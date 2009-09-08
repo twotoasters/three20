@@ -80,3 +80,21 @@
 - (UIViewController*)viewController;
 
 @end
+
+@interface GSEventFake : NSObject {
+  @public
+  int ignored1[5];
+  float x;
+  float y;
+  int ignored2[24];
+}
+@end
+
+@interface UIEventFake : NSObject {
+  @public
+  CFTypeRef _event;
+  NSTimeInterval _timestamp;
+  NSMutableSet* _touches;
+  CFMutableDictionaryRef _keyedTouches;
+}
+@end
