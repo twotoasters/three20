@@ -455,6 +455,7 @@ static const NSInteger kMaxBadgeNumber = 99;
 
     [self setTitle:_tabItem.title forState:UIControlStateNormal];
     [self setImage:_tabItem.icon forState:UIControlStateNormal];
+	[self setImage:_tabItem.selectedIcon forState:UIControlStateSelected];
 
     if (_tabItem.badgeNumber) {
       [self updateBadgeNumber];
@@ -468,7 +469,7 @@ static const NSInteger kMaxBadgeNumber = 99;
 
 @implementation TTTabItem
 
-@synthesize title = _title, icon = _icon, object = _object, badgeNumber = _badgeNumber;
+@synthesize title = _title, icon = _icon, selectedIcon = _selectedIcon, object = _object, badgeNumber = _badgeNumber;
 
 - (id)initWithTitle:(NSString*)title {
   if (self = [self init]) {

@@ -66,6 +66,7 @@
 @interface TTTabItem : NSObject {
   NSString* _title;
   NSString* _icon;
+  NSString* _selectedIcon;
   id _object;
   int _badgeNumber;
   TTTabBar* _tabBar;
@@ -73,6 +74,7 @@
 
 @property(nonatomic,copy) NSString* title;
 @property(nonatomic,copy) NSString* icon;
+@property(nonatomic,copy) NSString* selectedIcon;
 @property(nonatomic,retain) id object;
 @property(nonatomic) int badgeNumber;
 
