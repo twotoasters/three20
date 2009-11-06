@@ -263,6 +263,7 @@
   }
 }
 
+#ifdef DEBUG
 - (void)simulateTapAtPoint:(CGPoint)location {
   UITouch *touch = [[[UITouch alloc] initInView:self location:location] autorelease];
 
@@ -274,6 +275,7 @@
   UIEvent *eventUp = [[[UIEvent alloc] initWithTouch:touch] autorelease];
   [touch.view touchesEnded:[NSSet setWithObject:touch] withEvent:eventUp];
 }
+#endif
 
 - (CGRect)frameWithKeyboardSubtracted:(CGFloat)plusHeight {
   CGRect frame = self.frame;
