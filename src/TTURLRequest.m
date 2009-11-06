@@ -156,15 +156,16 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
     }
   }
   
-  for (NSInteger i = 0; i < _files.count; i += 3) {
+  for (NSInteger i = 0; i < _files.count; i += 4) {
     NSData* data = [_files objectAtIndex:i];
     NSString* mimeType = [_files objectAtIndex:i+1];
     NSString* fileName = [_files objectAtIndex:i+2];
+	NSString* paramName = [_files objectAtIndex:i+3];
       
     [body appendData:[beginLine dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:[[NSString stringWithFormat:
                        @"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n",
-                       fileName, fileName]
+                       paramName, fileName]
           dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:[[NSString stringWithFormat:@"Content-Length: %d\r\n", data.length]
           dataUsingEncoding:NSUTF8StringEncoding]];  
@@ -230,6 +231,10 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 }
 
 - (void)addFile:(NSData*)data mimeType:(NSString*)mimeType fileName:(NSString*)fileName {
+	[self addFile:data mimeType:mimeType fileName:fileName paramName:fileName];
+}
+
+- (void)addFile:(NSData*)data mimeType:(NSString*)mimeType fileName:(NSString*)fileName paramName:(NSString*)paramName{
   if (!_files) {
     _files = [[NSMutableArray alloc] init];
   }
@@ -237,6 +242,7 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
   [_files addObject:data];
   [_files addObject:mimeType];
   [_files addObject:fileName];
+  [_files addObject:paramName];
 }
 
 - (BOOL)send {
