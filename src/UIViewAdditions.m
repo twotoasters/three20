@@ -1,5 +1,8 @@
 #import "Three20/TTGlobal.h"
 
+// Remove GSEvent and UITouchAddtions from Release builds
+#ifdef DEBUG
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // This code for synthesizing touch events is derived from:
 // http://cocoawithlove.com/2008/10/synthesizing-touch-event-on-iphone.html
@@ -90,6 +93,8 @@
 }
 
 @end
+
+#endif
 
 @implementation UIView (TTCategory)
 
@@ -288,6 +293,7 @@
   }
 }
 
+#ifdef DEBUG
 - (void)simulateTapAtPoint:(CGPoint)location {
   UITouch *touch = [[[UITouch alloc] initInView:self location:location] autorelease];
 
@@ -299,5 +305,6 @@
   UIEvent *eventUp = [[[UIEvent alloc] initWithTouch:touch] autorelease];
   [touch.view touchesEnded:[NSSet setWithObject:touch] withEvent:eventUp];
 }
+#endif
 
 @end
