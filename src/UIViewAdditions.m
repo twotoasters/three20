@@ -1,6 +1,32 @@
 #import "Three20/TTGlobal.h"
 
+
+// Remove GSEvent and UITouchAddtions from Release builds
+#ifdef DEBUG
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// This code for synthesizing touch events is derived from:
+// http://cocoawithlove.com/2008/10/synthesizing-touch-event-on-iphone.html
+
+@interface GSEventFake : NSObject {
+  @public
+  int ignored1[5];
+  float x;
+  float y;
+  int ignored2[24];
+}
+@end
+
 @implementation GSEventFake
+@end
+
+@interface UIEventFake : NSObject {
+  @public
+  CFTypeRef _event;
+  NSTimeInterval _timestamp;
+  NSMutableSet* _touches;
+  CFMutableDictionaryRef _keyedTouches;
+}
 @end
 
 @implementation UIEventFake
@@ -44,6 +70,7 @@
 
 @end
 
+
 @implementation UIEvent (TTCategory)
 
 - (id)initWithTouch:(UITouch *)touch {
@@ -68,6 +95,9 @@
 }
 
 @end
+
+#endif
+
 
 @implementation UIView (TTCategory)
 
@@ -279,7 +309,8 @@
 
 - (CGRect)frameWithKeyboardSubtracted:(CGFloat)plusHeight {
   CGRect frame = self.frame;
-  if ([self.window performSelector:@selector(firstResponder)]) {
+  if( TTIsKeyboardVisible() )
+  {
     CGRect screenFrame = TTScreenBounds();
     CGFloat keyboardTop = (screenFrame.size.height - (TTKeyboardHeight() + plusHeight));
     CGFloat screenBottom = self.screenY + frame.size.height;
