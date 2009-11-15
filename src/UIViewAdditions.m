@@ -2,101 +2,101 @@
 
 
 // Remove GSEvent and UITouchAddtions from Release builds
-#ifdef DEBUG
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// This code for synthesizing touch events is derived from:
-// http://cocoawithlove.com/2008/10/synthesizing-touch-event-on-iphone.html
-
-@interface GSEventFake : NSObject {
-  @public
-  int ignored1[5];
-  float x;
-  float y;
-  int ignored2[24];
-}
-@end
-
-@implementation GSEventFake
-@end
-
-@interface UIEventFake : NSObject {
-  @public
-  CFTypeRef _event;
-  NSTimeInterval _timestamp;
-  NSMutableSet* _touches;
-  CFMutableDictionaryRef _keyedTouches;
-}
-@end
-
-@implementation UIEventFake
-
-- (void)dealloc {
-  [super dealloc];
-}
-
-@end
-
-@interface UITouch (TTCategory)
-
-- (id)initInView:(UIView *)view location:(CGPoint)location;
-- (void)changeToPhase:(UITouchPhase)phase;
-
-@end
-
-@implementation UITouch (TTCategory)
-
-- (id)initInView:(UIView *)view location:(CGPoint)location {
-  if (self = [super init]) {
-    _tapCount = 1;
-    _locationInWindow = location;
-    _previousLocationInWindow = location;
-
-    UIView *target = [view.window hitTest:_locationInWindow withEvent:nil];
-    _view = [target retain];
-    _window = [view.window retain];
-    _phase = UITouchPhaseBegan;
-    _touchFlags._firstTouchForView = 1;
-    _touchFlags._isTap = 1;
-    _timestamp = [NSDate timeIntervalSinceReferenceDate];
-  }
-  return self;
-}
-
-- (void)changeToPhase:(UITouchPhase)phase {
-  _phase = phase;
-  _timestamp = [NSDate timeIntervalSinceReferenceDate];
-}
-
-@end
-
-
-@implementation UIEvent (TTCategory)
-
-- (id)initWithTouch:(UITouch *)touch {
-  if (self == [super init]) {
-    UIEventFake *selfFake = (UIEventFake*)self;
-    selfFake->_touches = [[NSMutableSet setWithObject:touch] retain];
-    selfFake->_timestamp = [NSDate timeIntervalSinceReferenceDate];
-
-    CGPoint location = [touch locationInView:touch.window];
-    GSEventFake* fakeGSEvent = [[GSEventFake alloc] init];
-    fakeGSEvent->x = location.x;
-    fakeGSEvent->y = location.y;
-    selfFake->_event = fakeGSEvent;
-
-    CFMutableDictionaryRef dict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2,
-      &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    CFDictionaryAddValue(dict, touch.view, selfFake->_touches);
-    CFDictionaryAddValue(dict, touch.window, selfFake->_touches);
-    selfFake->_keyedTouches = dict;
-  }
-  return self;
-}
-
-@end
-
-#endif
+//#ifdef DEBUG
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//// This code for synthesizing touch events is derived from:
+//// http://cocoawithlove.com/2008/10/synthesizing-touch-event-on-iphone.html
+//
+//@interface GSEventFake : NSObject {
+//  @public
+//  int ignored1[5];
+//  float x;
+//  float y;
+//  int ignored2[24];
+//}
+//@end
+//
+//@implementation GSEventFake
+//@end
+//
+//@interface UIEventFake : NSObject {
+//  @public
+//  CFTypeRef _event;
+//  NSTimeInterval _timestamp;
+//  NSMutableSet* _touches;
+//  CFMutableDictionaryRef _keyedTouches;
+//}
+//@end
+//
+//@implementation UIEventFake
+//
+//- (void)dealloc {
+//  [super dealloc];
+//}
+//
+//@end
+//
+//@interface UITouch (TTCategory)
+//
+//- (id)initInView:(UIView *)view location:(CGPoint)location;
+//- (void)changeToPhase:(UITouchPhase)phase;
+//
+//@end
+//
+//@implementation UITouch (TTCategory)
+//
+//- (id)initInView:(UIView *)view location:(CGPoint)location {
+//  if (self = [super init]) {
+//    _tapCount = 1;
+//    _locationInWindow = location;
+//    _previousLocationInWindow = location;
+//
+//    UIView *target = [view.window hitTest:_locationInWindow withEvent:nil];
+//    _view = [target retain];
+//    _window = [view.window retain];
+//    _phase = UITouchPhaseBegan;
+//    _touchFlags._firstTouchForView = 1;
+//    _touchFlags._isTap = 1;
+//    _timestamp = [NSDate timeIntervalSinceReferenceDate];
+//  }
+//  return self;
+//}
+//
+//- (void)changeToPhase:(UITouchPhase)phase {
+//  _phase = phase;
+//  _timestamp = [NSDate timeIntervalSinceReferenceDate];
+//}
+//
+//@end
+//
+//
+//@implementation UIEvent (TTCategory)
+//
+//- (id)initWithTouch:(UITouch *)touch {
+//  if (self == [super init]) {
+//    UIEventFake *selfFake = (UIEventFake*)self;
+//    selfFake->_touches = [[NSMutableSet setWithObject:touch] retain];
+//    selfFake->_timestamp = [NSDate timeIntervalSinceReferenceDate];
+//
+//    CGPoint location = [touch locationInView:touch.window];
+//    GSEventFake* fakeGSEvent = [[GSEventFake alloc] init];
+//    fakeGSEvent->x = location.x;
+//    fakeGSEvent->y = location.y;
+//    selfFake->_event = fakeGSEvent;
+//
+//    CFMutableDictionaryRef dict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2,
+//      &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+//    CFDictionaryAddValue(dict, touch.view, selfFake->_touches);
+//    CFDictionaryAddValue(dict, touch.window, selfFake->_touches);
+//    selfFake->_keyedTouches = dict;
+//  }
+//  return self;
+//}
+//
+//@end
+//
+//#endif
 
 
 @implementation UIView (TTCategory)
