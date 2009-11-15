@@ -187,8 +187,10 @@ static TTURLRequestQueue* gMainQueue = nil;
       withObject:_response withObject:_responseData];
   } else {
     TTLOG(@"  FAILED LOADING (%d) %@", _response.statusCode, _URL);
+	// I need the data on the error response. this is a hack. I should probably process the response properly. jbe
+	NSDictionary* userInfo = [NSDictionary dictionaryWithObject:_responseData forKey:@"data"];
     NSError* error = [NSError errorWithDomain:NSURLErrorDomain code:_response.statusCode
-      userInfo:nil];
+		userInfo:userInfo]; 
     [_queue performSelector:@selector(loader:didFailLoadWithError:) withObject:self
       withObject:error];
   }
