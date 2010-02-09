@@ -1,7 +1,29 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTMessageController.h"
+
+#import "Three20/TTGlobalCore.h"
+#import "Three20/TTGlobalCoreLocale.h"
+#import "Three20/TTGlobalUI.h"
+#import "Three20/TTGlobalUINavigator.h"
+
+#import "Three20/TTTableViewDataSource.h"
 #import "Three20/TTDefaultStyleSheet.h"
 #import "Three20/TTPickerTextField.h"
-#import "Three20/TTTextEditor.h"
 #import "Three20/TTActivityLabel.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -307,7 +329,7 @@
     }
     ++index;
   }
-  if (_textEditor.textView.isFirstResponder) {
+  if (_textEditor.isFirstResponder) {
     return _fieldViews.count;
   }
   return -1;
@@ -318,7 +340,7 @@
     UIView* view = [_fieldViews objectAtIndex:index];
     [view becomeFirstResponder];
   } else {
-    [_textEditor.textView becomeFirstResponder];
+    [_textEditor becomeFirstResponder];
   }
 }
 
@@ -392,9 +414,9 @@
   [self.view addSubview:_scrollView];
 
   _textEditor = [[TTTextEditor alloc] initWithFrame:CGRectMake(0, 0, _scrollView.width, 0)];
-  _textEditor.textDelegate = self;
+  _textEditor.delegate = self;
   _textEditor.backgroundColor = TTSTYLEVAR(backgroundColor);
-  _textEditor.textView.font = TTSTYLEVAR(messageFont);
+  _textEditor.font = TTSTYLEVAR(messageFont);
   _textEditor.autoresizingMask = UIViewAutoresizingFlexibleWidth;
   _textEditor.autoresizesToText = YES;
   _textEditor.showsExtraLine = YES;
@@ -520,7 +542,7 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
   NSUInteger fieldIndex = [_fieldViews indexOfObject:textField];
   UIView* nextView = fieldIndex == _fieldViews.count-1
-    ? _textEditor.textView
+    ? _textEditor
     : [_fieldViews objectAtIndex:fieldIndex+1];
   [nextView becomeFirstResponder];
   return NO;
@@ -541,7 +563,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // TTTextEditorDelegate
 
-- (void)textViewDidChange:(UITextView *)textView {
+- (void)textEditorDidChange:(TTTextEditor*)textEditor {
   [self updateSendCommand];
   _isModified = YES;
 }
