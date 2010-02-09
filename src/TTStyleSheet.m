@@ -1,4 +1,22 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTStyleSheet.h"
+
+#import "Three20/TTGlobalCore.h"
 #import "Three20/TTDefaultStyleSheet.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,13 +49,27 @@ static TTStyleSheet* gStyleSheet = nil;
 - (id)init {
   if (self = [super init]) {
     _styles = nil;
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                          selector:@selector(didReceiveMemoryWarning:)
+                                          name:UIApplicationDidReceiveMemoryWarningNotification  
+                                          object:nil];  
   }
   return self;
 }
 
 - (void)dealloc {
-  [_styles release];
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                        name:UIApplicationDidReceiveMemoryWarningNotification  
+                                        object:nil];  
+  TT_RELEASE_SAFELY(_styles);
   [super dealloc];
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// NSNotifications
+
+- (void)didReceiveMemoryWarning:(void*)object {
+  [self freeMemory];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,8 +100,7 @@ static TTStyleSheet* gStyleSheet = nil;
 }
 
 - (void)freeMemory {
-  [_styles release];
-  _styles = nil;
+  TT_RELEASE_SAFELY(_styles);
 }
 
 @end

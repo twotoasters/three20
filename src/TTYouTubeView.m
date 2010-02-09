@@ -1,4 +1,23 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTYouTubeView.h"
+
+#import "Three20/TTGlobalCore.h"
+#import "Three20/TTGlobalUI.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -20,41 +39,52 @@ wmode=\"transparent\" width=\"%0.0f\" height=\"%0.0f\"></embed>\
 </body>\
 </html>";
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 @implementation TTYouTubeView
 
-@synthesize url = _url;
+@synthesize URL = _URL;
 
-- (id)initWithURL:(NSString*)url {
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (id)initWithURL:(NSString*)URL {
   if (self = [self initWithFrame:CGRectMake(0, 0, kDefaultWidth, kDefaultHeight)]) {
-    self.url = url;
+    self.URL = URL;
   }
   return self;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)dealloc {
-  [_url release];
+  TT_RELEASE_SAFELY(_URL);
   [super dealloc];
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// UIView
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark UIView
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)layoutSubviews {
   [self stringByEvaluatingJavaScriptFromString:
     [NSString stringWithFormat:@"yt.width = %0.0f; yt.height = %0.0f", self.width, self.height]];
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)setURL:(NSString*)URL {
+  [_URL release];
+  _URL = [URL copy];
 
-- (void)setUrl:(NSString*)url {
-  [_url release];
-  _url = [url copy];
-
-  if (_url) {
+  if (_URL) {
     NSString* html = [NSString stringWithFormat:kEmbedHTML, self.width, self.width,
-                               self.height, _url, _url, self.width, self.height];
+                               self.height, _URL, _URL, self.width, self.height];
     [self loadHTMLString:html baseURL:nil];
   } else {
     [self loadHTMLString:@"&nbsp;" baseURL:nil];

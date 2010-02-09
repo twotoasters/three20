@@ -1,4 +1,23 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTURLResponse.h"
+
+#import "Three20/TTGlobalCore.h"
+
 #import "Three20/TTURLRequest.h"
 #import "Three20/TTURLCache.h"
 
@@ -16,7 +35,7 @@
 }
 
 - (void)dealloc {
-  [_data release];
+  TT_RELEASE_SAFELY(_data);
   [super dealloc];
 }
 
@@ -47,7 +66,7 @@
 }
 
 - (void)dealloc {
-  [_image release];
+  TT_RELEASE_SAFELY(_image);
   [super dealloc];
 }
 
@@ -59,7 +78,7 @@
   if ([data isKindOfClass:[UIImage class]]) {
     _image = [data retain];
   } else if ([data isKindOfClass:[NSData class]]) {
-    UIImage* image = [[TTURLCache sharedCache] imageForURL:request.url fromDisk:NO];
+    UIImage* image = [[TTURLCache sharedCache] imageForURL:request.URL fromDisk:NO];
     if (!image) {
       image = [UIImage imageWithData:data];
     }
@@ -70,9 +89,9 @@
 //          image = [image transformWidth:300 height:(image.size.height/image.size.width)*300.0
 //                         rotate:NO];
 //          NSData* data = UIImagePNGRepresentation(image);
-//          [[TTURLCache sharedCache] storeData:data forURL:request.url];
+//          [[TTURLCache sharedCache] storeData:data forURL:request.URL];
 //        }
-        [[TTURLCache sharedCache] storeImage:image forURL:request.url];
+        [[TTURLCache sharedCache] storeImage:image forURL:request.URL];
       }
       _image = [image retain];
     } else {

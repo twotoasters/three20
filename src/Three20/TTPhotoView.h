@@ -1,22 +1,40 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTImageView.h"
 #import "Three20/TTPhotoSource.h"
 
 @protocol TTPhoto;
-@class TTActivityLabel;
+@class TTActivityLabel, TTLabel;
 
 @interface TTPhotoView : TTImageView <TTImageViewDelegate> {
   id <TTPhoto> _photo;
   UIActivityIndicatorView* _statusSpinner;
-  UILabel* _statusLabel;
-  UILabel* _captionLabel;
+  TTLabel* _statusLabel;
+  TTLabel* _captionLabel;
+  TTStyle* _captionStyle;
   TTPhotoVersion _photoVersion;
-  BOOL _extrasHidden;
-  BOOL _captionHidden;
+  BOOL _hidesExtras;
+  BOOL _hidesCaption;
 }
 
 @property(nonatomic,retain) id<TTPhoto> photo;
-@property(nonatomic) BOOL extrasHidden;
-@property(nonatomic) BOOL captionHidden;
+@property(nonatomic,retain) TTStyle* captionStyle;
+@property(nonatomic) BOOL hidesExtras;
+@property(nonatomic) BOOL hidesCaption;
 
 - (BOOL)loadPreview:(BOOL)fromNetwork;
 - (void)loadImage;

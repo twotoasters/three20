@@ -1,4 +1,24 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTSearchlightLabel.h"
+
+#import "Three20/TTGlobalCore.h"
+#import "Three20/TTGlobalStyle.h"
+
 #import "Three20/TTDefaultStyleSheet.h"
 
 @implementation TTSearchlightLabel
@@ -6,33 +26,10 @@
 @synthesize text = _text, font = _font, textColor, spotlightColor = _spotlightColor,
   textAlignment = _textAlignment;
 
-- (id)initWithFrame:(CGRect)frame {
-	if (self = [super initWithFrame:frame]) {
-    _timer = nil;
-    
-    self.text = @"";
-    self.font = TTSTYLEVAR(font);
-    self.textColor = [UIColor colorWithWhite:0.25 alpha:1];
-    self.spotlightColor = [UIColor whiteColor];
-    self.textAlignment = UITextAlignmentLeft;
-    self.backgroundColor = [UIColor clearColor];
-    self.contentMode = UIViewContentModeCenter;
-	}
-	return self;
-}
-
-- (void)dealloc {
-  [self stopAnimating];
-  [_text release];
-  [_font release];
-  [textColor release];
-  [_spotlightColor release];
-	[super dealloc];
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
+// private
 
-- (void)createMask {
+- (void)newMask {
   CGRect rect = self.frame;
   CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
   int bitmapBytesPerRow = (rect.size.width * 4);
@@ -50,7 +47,7 @@
   _maskData = nil;
 }
 
-- (CGImageRef)createSpotlightMask:(CGRect)rect origin:(CGPoint)origin radius:(CGFloat)radius {
+- (CGImageRef)newSpotlightMask:(CGRect)rect origin:(CGPoint)origin radius:(CGFloat)radius {
   CGContextClearRect(_maskContext, rect);
 
   CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
@@ -72,6 +69,33 @@
   if (_spotlightPoint <= 1.5) {
     [self setNeedsDisplay];
   }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// NSObject
+
+- (id)initWithFrame:(CGRect)frame {
+	if (self = [super initWithFrame:frame]) {
+    _timer = nil;
+    
+    self.text = @"";
+    self.font = TTSTYLEVAR(font);
+    self.textColor = [UIColor colorWithWhite:0.25 alpha:1];
+    self.spotlightColor = [UIColor whiteColor];
+    self.textAlignment = UITextAlignmentLeft;
+    self.backgroundColor = [UIColor clearColor];
+    self.contentMode = UIViewContentModeCenter;
+	}
+	return self;
+}
+
+- (void)dealloc {
+  [self stopAnimating];
+  TT_RELEASE_SAFELY(_text);
+  TT_RELEASE_SAFELY(_font);
+  TT_RELEASE_SAFELY(textColor);
+  TT_RELEASE_SAFELY(_spotlightColor);
+	[super dealloc];
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +134,7 @@
       y - ceil(self.font.capHeight/2));
     CGFloat spotRadius = self.font.capHeight*2;
 
-    CGImageRef mask = [self createSpotlightMask:rect origin:spotOrigin radius:spotRadius];
+    CGImageRef mask = [self newSpotlightMask:rect origin:spotOrigin radius:spotRadius];
     CGContextClipToMask(context, rect, mask);
     CGImageRelease(mask);
     
@@ -124,13 +148,28 @@
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+// UIAccessibility
 
+- (BOOL)isAccessibilityElement {
+  return YES;
+}
+
+- (NSString *)accessibilityLabel {
+  return _text;
+}
+
+- (UIAccessibilityTraits)accessibilityTraits {
+  return [super accessibilityTraits] | UIAccessibilityTraitStaticText;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// public
 - (void)startAnimating {
   if (!_timer) {
     _timer = [NSTimer scheduledTimerWithTimeInterval:1.0/32 target:self
       selector:@selector(updateSpotlight) userInfo:nil repeats:YES];
     _spotlightPoint = -0.5;
-    [self createMask];
+    [self newMask];
   }
 }
 

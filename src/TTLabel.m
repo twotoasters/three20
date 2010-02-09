@@ -1,4 +1,22 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTLabel.h"
+
+#import "Three20/TTGlobalCore.h"
 #import "Three20/TTDefaultStyleSheet.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -11,7 +29,7 @@
 // NSObject
 
 - (id)initWithText:(NSString*)text {
-  if (self = [self initWithFrame:CGRectZero]) {
+  if (self = [self init]) {
     self.text = text;
   }
   return self;
@@ -26,8 +44,8 @@
 }
 
 - (void)dealloc {
-  [_text release];
-  [_font release];
+  TT_RELEASE_SAFELY(_text);
+  TT_RELEASE_SAFELY(_font);
   [super dealloc];
 }
 
@@ -51,9 +69,25 @@
   TTStyleContext* context = [[[TTStyleContext alloc] init] autorelease];
   context.delegate = self;
   context.font = _font;
-  context.frame = self.bounds;
+  context.frame = CGRectMake(0, 0, size.width, size.height);
   context.contentFrame = context.frame;
   return [_style addToSize:CGSizeZero context:context];
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// UIAccessibility
+
+- (BOOL)isAccessibilityElement {
+  return YES;
+}
+
+- (NSString *)accessibilityLabel {
+  return _text;
+}
+
+- (UIAccessibilityTraits)accessibilityTraits {
+  return [super accessibilityTraits] | UIAccessibilityTraitStaticText;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

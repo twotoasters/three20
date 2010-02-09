@@ -1,9 +1,31 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTSearchTextField.h"
-#import "Three20/TTNavigationCenter.h"
+
+#import "Three20/TTGlobalCore.h"
+#import "Three20/TTGlobalUI.h"
+#import "Three20/TTGlobalUINavigator.h"
+
+#import "Three20/TTNavigator.h"
 #import "Three20/TTView.h"
 #import "Three20/TTDefaultStyleSheet.h"
 #import "Three20/TTTableView.h"
-#import "Three20/TTTableFieldCell.h"
+#import "Three20/TTTableItemCell.h"
+#import "Three20/TTTableViewDataSource.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -150,21 +172,22 @@ static const CGFloat kDesiredTableHeight = 150;
 }
 
 - (void)dealloc {
-  [_dataSource.delegates removeObject:self];
-  [_dataSource release];
-  [_internal release];
-  [_tableView release];
-  [_shadowView release];
-  [_screenView release];
-  [_previousNavigationItem release];
-  [_previousRightBarButtonItem release];
+  [_dataSource.model.delegates removeObject:self];
+  _tableView.delegate = nil;
+  TT_RELEASE_SAFELY(_dataSource);
+  TT_RELEASE_SAFELY(_internal);
+  TT_RELEASE_SAFELY(_tableView);
+  TT_RELEASE_SAFELY(_shadowView);
+  TT_RELEASE_SAFELY(_screenView);
+  TT_RELEASE_SAFELY(_previousNavigationItem);
+  TT_RELEASE_SAFELY(_previousRightBarButtonItem);
   [super dealloc];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)showDoneButton:(BOOL)show {
-  UIViewController* controller = [TTNavigationCenter defaultCenter].visibleViewController;
+  UIViewController* controller = [TTNavigator navigator].visibleViewController;
   if (controller) {
     if (show) {
       _previousNavigationItem = [controller.navigationItem retain];
@@ -176,10 +199,8 @@ static const CGFloat kDesiredTableHeight = 150;
       [controller.navigationItem setRightBarButtonItem:doneButton animated:YES];
     } else {
       [_previousNavigationItem setRightBarButtonItem:_previousRightBarButtonItem animated:YES];
-      [_previousRightBarButtonItem release];
-      _previousRightBarButtonItem = nil;
-      [_previousNavigationItem release];
-      _previousNavigationItem = nil;
+      TT_RELEASE_SAFELY(_previousRightBarButtonItem);
+      TT_RELEASE_SAFELY(_previousNavigationItem);
     }
   }
 }
@@ -234,10 +255,16 @@ static const CGFloat kDesiredTableHeight = 150;
     selector:@selector(dispatchUpdate:) userInfo:nil repeats:NO];
 }
 
+- (BOOL)hasSearchResults {
+  return (![_dataSource respondsToSelector:@selector(numberOfSectionsInTableView:)]
+          || [_dataSource numberOfSectionsInTableView:_tableView])
+      && [_dataSource tableView:_tableView numberOfRowsInSection:0];
+}
+
 - (void)reloadTable {
-  if ((![_dataSource respondsToSelector:@selector(numberOfSectionsInTableView:)]
-      || [_dataSource numberOfSectionsInTableView:_tableView])
-      && [_dataSource tableView:_tableView numberOfRowsInSection:0]) {
+  [_dataSource tableViewDidLoadModel:self.tableView];
+
+  if ([self hasSearchResults]) {
     [self layoutIfNeeded];
     [self showSearchResults:YES];
     [self.tableView reloadData];
@@ -283,9 +310,9 @@ static const CGFloat kDesiredTableHeight = 150;
   if (_rowHeight) {
     return _rowHeight;
   } else {
-    id item = [_dataSource tableView:tableView objectForRowAtIndexPath:indexPath];
-    Class cls = [_dataSource tableView:tableView cellClassForObject:item];
-    return [cls tableView:_tableView rowHeightForItem:item];
+    id object = [_dataSource tableView:tableView objectForRowAtIndexPath:indexPath];
+    Class cls = [_dataSource tableView:tableView cellClassForObject:object];
+    return [cls tableView:_tableView rowHeightForObject:object];
   }
 }
 
@@ -295,25 +322,29 @@ static const CGFloat kDesiredTableHeight = 150;
     UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
     if (cell.selectionStyle != UITableViewCellSeparatorStyleNone) {
       [_internal.delegate performSelector:@selector(textField:didSelectObject:) withObject:self
-        withObject:object];      
+                          withObject:object];      
     }
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// TTTableViewDataSourceDelegate
+// TTModelDelegate
 
-- (void)dataSourceDidStartLoad:(id<TTTableViewDataSource>)dataSource {
+- (void)modelDidStartLoad:(id<TTModel>)model {
   if (!_searchesAutomatically) {
     [self reloadTable];
   }
 }
 
-- (void)dataSourceDidFinishLoad:(id<TTTableViewDataSource>)dataSource {
+- (void)modelDidFinishLoad:(id<TTModel>)model {
   [self reloadTable];
 }
 
-- (void)dataSource:(id<TTTableViewDataSource>)dataSource didFailLoadWithError:(NSError*)error {
+- (void)modelDidChange:(id<TTModel>)model {
+  [self reloadTable];
+}
+
+- (void)model:(id<TTModel>)model didFailLoadWithError:(NSError*)error {
   [self reloadTable];
 }
 
@@ -322,7 +353,7 @@ static const CGFloat kDesiredTableHeight = 150;
 
 - (void)didBeginEditing {
   if (_dataSource) {
-    UIScrollView* scrollView = (UIScrollView*)[self firstParentOfClass:[UIScrollView class]];
+    UIScrollView* scrollView = (UIScrollView*)[self ancestorOrSelfWithClass:[UIScrollView class]];
     scrollView.scrollEnabled = NO;
     scrollView.scrollsToTop = NO;
 
@@ -332,7 +363,7 @@ static const CGFloat kDesiredTableHeight = 150;
     if (_showsDarkScreen) {
       [self showDarkScreen:YES];
     }
-    if (self.hasText) {
+    if (self.hasText && self.hasSearchResults) {
       [self showSearchResults:YES];
     }
   }
@@ -340,7 +371,7 @@ static const CGFloat kDesiredTableHeight = 150;
 
 - (void)didEndEditing {
   if (_dataSource) {
-    UIScrollView* scrollView = (UIScrollView*)[self firstParentOfClass:[UIScrollView class]];
+    UIScrollView* scrollView = (UIScrollView*)[self ancestorOrSelfWithClass:[UIScrollView class]];
     scrollView.scrollEnabled = YES;
     scrollView.scrollsToTop = YES;
     
@@ -360,10 +391,10 @@ static const CGFloat kDesiredTableHeight = 150;
 
 - (void)setDataSource:(id<TTTableViewDataSource>)dataSource {
   if (dataSource != _dataSource) {
-    [_dataSource.delegates removeObject:self];
+    [_dataSource.model.delegates removeObject:self];
     [_dataSource release];
     _dataSource = [dataSource retain];
-    [_dataSource.delegates addObject:self];
+    [_dataSource.model.delegates addObject:self];
   }
 }
 
@@ -399,7 +430,7 @@ static const CGFloat kDesiredTableHeight = 150;
 - (void)search {
   if (_dataSource) {
     NSString* text = self.searchText;
-    [_dataSource tableView:self.tableView search:text];
+    [_dataSource search:text];
   }
 }
 
@@ -408,7 +439,7 @@ static const CGFloat kDesiredTableHeight = 150;
     self.tableView;
     
     if (!_shadowView) {
-      _shadowView = [[TTView alloc] initWithFrame:CGRectZero];
+      _shadowView = [[TTView alloc] init];
       _shadowView.style = TTSTYLE(searchTableShadow);
       _shadowView.backgroundColor = [UIColor clearColor];
       _shadowView.userInteractionEnabled = NO;
@@ -435,7 +466,7 @@ static const CGFloat kDesiredTableHeight = 150;
 }
 
 - (UIView*)superviewForSearchResults {
-  UIScrollView* scrollView = (UIScrollView*)[self firstParentOfClass:[UIScrollView class]];
+  UIScrollView* scrollView = (UIScrollView*)[self ancestorOrSelfWithClass:[UIScrollView class]];
   if (scrollView) {
     return scrollView;
   } else {
@@ -460,8 +491,8 @@ static const CGFloat kDesiredTableHeight = 150;
   }  
   
   CGFloat height = self.height;
-  CGFloat keyboardHeight = withKeyboard ? KEYBOARD_HEIGHT : 0;
-  CGFloat tableHeight = self.window.height - (self.screenY + height + keyboardHeight);
+  CGFloat keyboardHeight = withKeyboard ? TTKeyboardHeight() : 0;
+  CGFloat tableHeight = self.window.height - (self.ttScreenY + height + keyboardHeight);
     
   return CGRectMake(0, y + self.height-1, superview.frame.size.width, tableHeight+1);
 }

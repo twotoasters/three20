@@ -1,4 +1,23 @@
-#import "Three20/TTGlobal.h"
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+
+#import "Three20/TTGlobalStyle.h"
 
 @protocol TTStyleDelegate;
 @class TTShape, TTStyleContext;
@@ -30,6 +49,8 @@
 @property(nonatomic,retain) TTStyle* next;
 
 - (id)initWithNext:(TTStyle*)next;
+
+- (TTStyle*)next:(TTStyle*)next;
 
 - (void)draw:(TTStyleContext*)context;
 
@@ -126,6 +147,7 @@
   UIColor* _shadowColor;
   CGSize _shadowOffset;
   CGFloat _minimumFontSize;
+  NSInteger _numberOfLines;
   UITextAlignment _textAlignment;
   UIControlContentVerticalAlignment _verticalAlignment;
   UILineBreakMode _lineBreakMode;
@@ -136,6 +158,7 @@
 @property(nonatomic,retain) UIColor* shadowColor;
 @property(nonatomic) CGFloat minimumFontSize;
 @property(nonatomic) CGSize shadowOffset;
+@property(nonatomic) NSInteger numberOfLines;
 @property(nonatomic) UITextAlignment textAlignment;
 @property(nonatomic) UIControlContentVerticalAlignment verticalAlignment;
 @property(nonatomic) UILineBreakMode lineBreakMode;
@@ -151,6 +174,13 @@
 + (TTTextStyle*)styleWithFont:(UIFont*)font color:(UIColor*)color
                 minimumFontSize:(CGFloat)minimumFontSize
                 shadowColor:(UIColor*)shadowColor shadowOffset:(CGSize)shadowOffset
+                next:(TTStyle*)next;
++ (TTTextStyle*)styleWithFont:(UIFont*)font color:(UIColor*)color
+                minimumFontSize:(CGFloat)minimumFontSize
+                shadowColor:(UIColor*)shadowColor shadowOffset:(CGSize)shadowOffset
+                textAlignment:(UITextAlignment)textAlignment
+                verticalAlignment:(UIControlContentVerticalAlignment)verticalAlignment
+                lineBreakMode:(UILineBreakMode)lineBreakMode numberOfLines:(NSInteger)numberOfLines
                 next:(TTStyle*)next;
 
 @end
@@ -200,6 +230,18 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+@interface TTBlendStyle : TTStyle {
+  CGBlendMode _blendMode;
+}
+
+@property(nonatomic) CGBlendMode blendMode;
+
++ (TTBlendStyle*)styleWithBlend:(CGBlendMode)blendMode next:(TTStyle*)next;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 @interface TTSolidFillStyle : TTStyle {
   UIColor* _color;
 }
@@ -228,12 +270,16 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 @interface TTReflectiveFillStyle : TTStyle {
-  UIColor* _color;
+  UIColor*  _color;
+  BOOL      _withBottomHighlight;
 }
 
 @property(nonatomic,retain) UIColor* color;
+@property(nonatomic,assign) BOOL     withBottomHighlight;
 
 + (TTReflectiveFillStyle*)styleWithColor:(UIColor*)color next:(TTStyle*)next;
++ (TTReflectiveFillStyle*)styleWithColor:(UIColor*)color
+                          withBottomHighlight:(BOOL)withBottomHighlight next:(TTStyle*)next;
 
 @end
 
@@ -275,6 +321,23 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+@interface TTHighlightBorderStyle : TTStyle {
+  UIColor* _color;
+  UIColor* _highlightColor;
+  CGFloat _width;
+}
+
+@property(nonatomic,retain) UIColor* color;
+@property(nonatomic,retain) UIColor* highlightColor;
+@property(nonatomic) CGFloat width;
+
++ (TTHighlightBorderStyle*)styleWithColor:(UIColor*)color highlightColor:(UIColor*)highlightColor
+                           width:(CGFloat)width next:(TTStyle*)next;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 @interface TTFourBorderStyle : TTStyle {
   UIColor* _top;
   UIColor* _right;
@@ -289,9 +352,12 @@
 @property(nonatomic,retain) UIColor* left;
 @property(nonatomic) CGFloat width;
 
-+ (TTFourBorderStyle*)styleWithTop:(UIColor*)top right:(UIColor*)right
-                      bottom:(UIColor*)bottom left:(UIColor*)left width:(CGFloat)width
-                      next:(TTStyle*)next;
++ (TTFourBorderStyle*)styleWithTop:(UIColor*)top right:(UIColor*)right bottom:(UIColor*)bottom
+                      left:(UIColor*)left width:(CGFloat)width next:(TTStyle*)next;
++ (TTFourBorderStyle*)styleWithTop:(UIColor*)top width:(CGFloat)width next:(TTStyle*)next;
++ (TTFourBorderStyle*)styleWithRight:(UIColor*)right width:(CGFloat)width next:(TTStyle*)next;
++ (TTFourBorderStyle*)styleWithBottom:(UIColor*)bottom width:(CGFloat)width next:(TTStyle*)next;
++ (TTFourBorderStyle*)styleWithLeft:(UIColor*)left width:(CGFloat)width next:(TTStyle*)next;
 
 @end
 
@@ -315,6 +381,31 @@
                        width:(CGFloat)width lightSource:(NSInteger)lightSource next:(TTStyle*)next;
 
 @end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+@interface TTLinearGradientBorderStyle : TTStyle {
+  UIColor* _color1;
+  UIColor* _color2;
+  CGFloat _location1;
+  CGFloat _location2;
+  CGFloat _width;
+}
+
+@property(nonatomic,retain) UIColor* color1;
+@property(nonatomic,retain) UIColor* color2;
+@property(nonatomic) CGFloat location1;
+@property(nonatomic) CGFloat location2;
+@property(nonatomic) CGFloat width;
+
++ (TTLinearGradientBorderStyle*)styleWithColor1:(UIColor*)color1 color2:(UIColor*)color2
+                                width:(CGFloat)width next:(TTStyle*)next;
++ (TTLinearGradientBorderStyle*)styleWithColor1:(UIColor*)color1 location1:(CGFloat)location1
+                                color2:(UIColor*)color2 location2:(CGFloat)location2
+                                width:(CGFloat)width next:(TTStyle*)next;
+
+@end
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 

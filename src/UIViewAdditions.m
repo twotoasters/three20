@@ -1,12 +1,35 @@
-#import "Three20/TTGlobal.h"
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 
-// Remove GSEvent and UITouchAddtions from Release builds
+#import "Three20/UIViewAdditions.h"
+
+#import "Three20/TTGlobalUI.h"
+#import "Three20/TTGlobalUINavigator.h"
+
+// Remove GSEvent and UITouchAdditions from Release builds
 #ifdef DEBUG
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// This code for synthesizing touch events is derived from:
-// http://cocoawithlove.com/2008/10/synthesizing-touch-event-on-iphone.html
-
+/**
+ * A private API class used for synthesizing touch events. This class is compiled out of release
+ * builds.
+ *
+ * This code for synthesizing touch events is derived from:
+ * http://cocoawithlove.com/2008/10/synthesizing-touch-event-on-iphone.html
+ */
 @interface GSEventFake : NSObject {
   @public
   int ignored1[5];
@@ -69,6 +92,7 @@
 
 @end
 
+
 @implementation UIEvent (TTCategory)
 
 - (id)initWithTouch:(UITouch *)touch {
@@ -95,6 +119,7 @@
 @end
 
 #endif
+
 
 @implementation UIView (TTCategory)
 
@@ -174,7 +199,10 @@
   self.frame = frame;
 }
 
-- (CGFloat)screenX {
+/**
+ * Return the x coordinate on the screen.
+ */
+- (CGFloat)ttScreenX {
   CGFloat x = 0;
   for (UIView* view = self; view; view = view.superview) {
     x += view.left;
@@ -182,13 +210,42 @@
   return x;
 }
 
-- (CGFloat)screenY {
+/**
+ * Return the y coordinate on the screen.
+ */
+- (CGFloat)ttScreenY {
   CGFloat y = 0;
   for (UIView* view = self; view; view = view.superview) {
     y += view.top;
   }
   return y;
 }
+
+#ifdef DEBUG
+
+/**
+ * Return the x coordinate on the screen.
+ *
+ * This method is being rejected by Apple due to false-positive private api static analysis.
+ *
+ * @deprecated
+ */
+- (CGFloat)screenX {
+  return [self ttScreenX];
+}
+
+/**
+ * Return the y coordinate on the screen.
+ *
+ * This method is being rejected by Apple due to false-positive private api static analysis.
+ *
+ * @deprecated
+ */
+- (CGFloat)screenY {
+  return [self ttScreenY];
+}
+
+#endif
 
 - (CGFloat)screenViewX {
   CGFloat x = 0;
@@ -221,44 +278,42 @@
   return CGRectMake(self.screenViewX, self.screenViewY, self.width, self.height);
 }
 
-- (CGPoint)offsetFromView:(UIView*)otherView {
-  CGFloat x = 0, y = 0;
-  for (UIView* view = self; view && view != otherView; view = view.superview) {
-    x += view.left;
-    y += view.top;
-  }
-  return CGPointMake(x, y);
+- (CGPoint)origin {
+  return self.frame.origin;
+}
+
+- (void)setOrigin:(CGPoint)origin {
+  CGRect frame = self.frame;
+  frame.origin = origin;
+  self.frame = frame;
+}
+
+- (CGSize)size {
+  return self.frame.size;
+}
+
+- (void)setSize:(CGSize)size {
+  CGRect frame = self.frame;
+  frame.size = size;
+  self.frame = frame;
 }
 
 - (CGFloat)orientationWidth {
-  return UIDeviceOrientationIsLandscape(TTDeviceOrientation())
+  return UIInterfaceOrientationIsLandscape(TTInterfaceOrientation())
     ? self.height : self.width;
 }
 
 - (CGFloat)orientationHeight {
-  return UIDeviceOrientationIsLandscape(TTDeviceOrientation())
+  return UIInterfaceOrientationIsLandscape(TTInterfaceOrientation())
     ? self.width : self.height;
 }
 
-- (UIScrollView*)findFirstScrollView {
-  if ([self isKindOfClass:[UIScrollView class]])
-    return (UIScrollView*)self;
-  
-  for (UIView* child in self.subviews) {
-    UIScrollView* it = [child findFirstScrollView];
-    if (it)
-      return it;
-  }
-  
-  return nil;
-}
-
-- (UIView*)firstViewOfClass:(Class)cls {
+- (UIView*)descendantOrSelfWithClass:(Class)cls {
   if ([self isKindOfClass:cls])
     return self;
   
   for (UIView* child in self.subviews) {
-    UIView* it = [child firstViewOfClass:cls];
+    UIView* it = [child descendantOrSelfWithClass:cls];
     if (it)
       return it;
   }
@@ -266,27 +321,17 @@
   return nil;
 }
 
-- (UIView*)firstParentOfClass:(Class)cls {
+- (UIView*)ancestorOrSelfWithClass:(Class)cls {
   if ([self isKindOfClass:cls]) {
     return self;
   } else if (self.superview) {
-    return [self.superview firstParentOfClass:cls];
+    return [self.superview ancestorOrSelfWithClass:cls];
   } else {
     return nil;
   }
 }
 
-- (UIView*)findChildWithDescendant:(UIView*)descendant {
-  for (UIView* view = descendant; view && view != self; view = view.superview) {
-    if (view.superview == self) {
-      return view;
-    }
-  }
-  
-  return nil;
-}
-
-- (void)removeSubviews {
+- (void)removeAllSubviews {
   while (self.subviews.count) {
     UIView* child = self.subviews.lastObject;
     [child removeFromSuperview];
@@ -306,5 +351,105 @@
   [touch.view touchesEnded:[NSSet setWithObject:touch] withEvent:eventUp];
 }
 #endif
+
+- (CGPoint)offsetFromView:(UIView*)otherView {
+  CGFloat x = 0, y = 0;
+  for (UIView* view = self; view && view != otherView; view = view.superview) {
+    x += view.left;
+    y += view.top;
+  }
+  return CGPointMake(x, y);
+}
+
+- (CGRect)frameWithKeyboardSubtracted:(CGFloat)plusHeight {
+  CGRect frame = self.frame;
+  if (TTIsKeyboardVisible()) {
+    CGRect screenFrame = TTScreenBounds();
+    CGFloat keyboardTop = (screenFrame.size.height - (TTKeyboardHeight() + plusHeight));
+    CGFloat screenBottom = self.ttScreenY + frame.size.height;
+    CGFloat diff = screenBottom - keyboardTop;
+    if (diff > 0) {
+      frame.size.height -= diff;
+    }
+  }
+  return frame;
+}
+
+- (void)presentAsKeyboardAnimationDidStop {
+  CGRect screenFrame = TTScreenBounds();
+  CGRect bounds = CGRectMake(0, 0, screenFrame.size.width, self.height);
+  CGPoint centerBegin = CGPointMake(floor(screenFrame.size.width/2 - self.width/2),
+                                    screenFrame.size.height + floor(self.height/2));
+  CGPoint centerEnd = CGPointMake(floor(screenFrame.size.width/2 - self.width/2),
+                                  screenFrame.size.height - floor(self.height/2));
+
+  NSDictionary* userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+    [NSValue valueWithCGRect:bounds], UIKeyboardBoundsUserInfoKey,
+    [NSValue valueWithCGPoint:centerBegin], UIKeyboardCenterBeginUserInfoKey,
+    [NSValue valueWithCGPoint:centerEnd], UIKeyboardCenterEndUserInfoKey,
+    nil];
+    
+  [[NSNotificationCenter defaultCenter] postNotificationName:@"UIKeyboardWillShowNotification"
+                                        object:self userInfo:userInfo];
+}
+
+- (void)dismissAsKeyboardAnimationDidStop {
+  [self removeFromSuperview];
+}
+
+- (void)presentAsKeyboardInView:(UIView*)containingView {
+  self.top = containingView.height;
+  [containingView addSubview:self];
+
+  [UIView beginAnimations:nil context:nil];
+  [UIView setAnimationDuration:TT_TRANSITION_DURATION];
+  [UIView setAnimationDelegate:self];
+  [UIView setAnimationDidStopSelector:@selector(presentAsKeyboardAnimationDidStop)];
+  self.top -= self.height;
+  [UIView commitAnimations];
+}
+
+- (void)dismissAsKeyboard:(BOOL)animated {
+  CGRect screenFrame = TTScreenBounds();
+  CGRect bounds = CGRectMake(0, 0, screenFrame.size.width, self.height);
+  CGPoint centerBegin = CGPointMake(floor(screenFrame.size.width/2 - self.width/2),
+                                    screenFrame.size.height - floor(self.height/2));
+  CGPoint centerEnd = CGPointMake(floor(screenFrame.size.width/2 - self.width/2),
+                                  screenFrame.size.height + floor(self.height/2));
+
+  NSDictionary* userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+    [NSValue valueWithCGRect:bounds], UIKeyboardBoundsUserInfoKey,
+    [NSValue valueWithCGPoint:centerBegin], UIKeyboardCenterBeginUserInfoKey,
+    [NSValue valueWithCGPoint:centerEnd], UIKeyboardCenterEndUserInfoKey,
+    nil];
+    
+  [[NSNotificationCenter defaultCenter] postNotificationName:@"UIKeyboardWillHideNotification"
+                                        object:self userInfo:userInfo];
+
+  if (animated) {
+    [UIView beginAnimations:nil context:nil];
+    [UIView setAnimationDuration:TT_TRANSITION_DURATION];
+    [UIView setAnimationDelegate:self];
+    [UIView setAnimationDidStopSelector:@selector(dismissAsKeyboardAnimationDidStop)];
+  }
+  
+  self.top += self.height;
+
+  if (animated) {
+    [UIView commitAnimations];
+  } else {
+    [self dismissAsKeyboardAnimationDidStop];
+  }
+}
+
+- (UIViewController*)viewController {
+  for (UIView* next = [self superview]; next; next = next.superview) {
+    UIResponder* nextResponder = [next nextResponder];
+    if ([nextResponder isKindOfClass:[UIViewController class]]) {
+      return (UIViewController*)nextResponder;
+    }
+  }
+  return nil;
+}
 
 @end

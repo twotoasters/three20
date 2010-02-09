@@ -1,8 +1,28 @@
-#include "Three20/TTButton.h"
-#include "Three20/TTDefaultStyleSheet.h"
-#include "Three20/TTURLRequest.h"
-#include "Three20/TTURLResponse.h"
-#include "Three20/TTURLCache.h"
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+#import "Three20/TTButton.h"
+
+#import "Three20/TTGlobalCore.h"
+#import "Three20/TTGlobalUI.h"
+
+#import "Three20/TTDefaultStyleSheet.h"
+#import "Three20/TTURLRequest.h"
+#import "Three20/TTURLResponse.h"
+#import "Three20/TTURLCache.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // global
@@ -54,11 +74,11 @@ static const CGFloat kVPadding = 7;
 
 - (void)dealloc {
   [_request cancel];
-  [_request release];
-  [_title release];
-  [_imageURL release];
-  [_image release];
-  [_style release];
+  TT_RELEASE_SAFELY(_request);
+  TT_RELEASE_SAFELY(_title);
+  TT_RELEASE_SAFELY(_imageURL);
+  TT_RELEASE_SAFELY(_image);
+  TT_RELEASE_SAFELY(_style);
   [super dealloc];
 }
 
@@ -75,30 +95,27 @@ static const CGFloat kVPadding = 7;
   self.image = response.image;
   [_button setNeedsDisplay];
   
-  [_request release];
-  _request = nil;
+  TT_RELEASE_SAFELY(_request);
 }
 
 - (void)request:(TTURLRequest*)request didFailLoadWithError:(NSError*)error {
-  [_request release];
-  _request = nil;
+  TT_RELEASE_SAFELY(_request);
 }
 
 - (void)requestDidCancelLoad:(TTURLRequest*)request {
-  [_request release];
-  _request = nil;
+  TT_RELEASE_SAFELY(_request);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
-- (void)setImageURL:(NSString*)url {
-  if (self.image && _imageURL && [url isEqualToString:_imageURL])
+- (void)setImageURL:(NSString*)URL {
+  if (self.image && _imageURL && [URL isEqualToString:_imageURL])
     return;
   
   [self stopLoading];
   [_imageURL release];
-  _imageURL = [url retain];
+  _imageURL = [URL retain];
   
   if (_imageURL.length) {
     [self reload];
@@ -132,19 +149,19 @@ static const CGFloat kVPadding = 7;
 
 @implementation TTButton
 
-@synthesize font = _font;
+@synthesize font = _font, isVertical = _isVertical;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // class public
 
 + (TTButton*)buttonWithStyle:(NSString*)selector {
-  TTButton* button = [[[TTButton alloc] initWithFrame:CGRectZero] autorelease];
+  TTButton* button = [[[TTButton alloc] init] autorelease];
   [button setStylesWithSelector:selector];
   return button;
 }
 
 + (TTButton*)buttonWithStyle:(NSString*)selector title:(NSString*)title {
-  TTButton* button = [[[TTButton alloc] initWithFrame:CGRectZero] autorelease];
+  TTButton* button = [[[TTButton alloc] init] autorelease];
   [button setTitle:title forState:UIControlStateNormal];
   [button setStylesWithSelector:selector];
   return button;
@@ -233,15 +250,17 @@ static const CGFloat kVPadding = 7;
   if (self = [super initWithFrame:frame]) {
     _content = nil;
     _font = nil;
+    _isVertical = NO;
     
     self.backgroundColor = [UIColor clearColor];
+    self.contentMode = UIViewContentModeRedraw;
   }
   return self;
 }
 
 - (void)dealloc {
-  [_content release];
-  [_font release];
+  TT_RELEASE_SAFELY(_content);
+  TT_RELEASE_SAFELY(_font);
   [super dealloc];
 }
 
@@ -262,25 +281,38 @@ static const CGFloat kVPadding = 7;
     if (imageStyle) {
       imageBoxStyle = [imageStyle.style firstStyleOfClass:[TTBoxStyle class]];
       imageSize = [imageStyle.style addToSize:CGSizeZero context:context];
-      textFrame.origin.x += imageSize.width;
-      textFrame.size.width -= imageSize.width;
+      if (_isVertical) {
+        CGFloat height = imageSize.height + imageBoxStyle.margin.top + imageBoxStyle.margin.bottom;
+        textFrame.origin.y += height;
+        textFrame.size.height -= height;
+      } else {
+        textFrame.origin.x += imageSize.width + imageBoxStyle.margin.right;
+        textFrame.size.width -= imageSize.width + imageBoxStyle.margin.right;
+      }
     }
     
     context.delegate = self;
     context.frame = self.bounds;
     context.contentFrame = textFrame;
     context.font = [self fontForCurrentState];
-
+    
     [style draw:context];
 
     if (imageStyle) {
       CGRect frame = context.contentFrame;
-      frame.size = imageSize;
-      frame.origin.x += imageBoxStyle.margin.left;
-      frame.origin.y += imageBoxStyle.margin.top;
-      
+      if (_isVertical) {
+        frame = self.bounds;
+        frame.origin.x += imageBoxStyle.margin.left;
+        frame.origin.y += imageBoxStyle.margin.top;
+      } else {
+        frame.size = imageSize;
+        frame.origin.x += imageBoxStyle.margin.left;
+        frame.origin.y += imageBoxStyle.margin.top;
+      }
+
       context.frame = frame;
       context.contentFrame = context.frame;
+      context.shape = nil;
       
       [imageStyle drawPart:context];
     }
@@ -316,6 +348,21 @@ static const CGFloat kVPadding = 7;
 - (void)setEnabled:(BOOL)enabled {
   [super setEnabled:enabled];
   [self setNeedsDisplay];
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// UIAccessibility
+
+- (BOOL)isAccessibilityElement {
+  return YES;
+}
+
+- (NSString *)accessibilityLabel {
+  return [self titleForCurrentState];
+}
+
+- (UIAccessibilityTraits)accessibilityTraits {
+  return [super accessibilityTraits] | UIAccessibilityTraitButton;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -354,6 +401,7 @@ static const CGFloat kVPadding = 7;
 - (void)setTitle:(NSString*)title forState:(UIControlState)state {
   TTButtonContent* content = [self contentForState:state];
   content.title = title;
+  [self setNeedsDisplay];
 }
 
 - (NSString*)imageForState:(UIControlState)state {
@@ -363,6 +411,7 @@ static const CGFloat kVPadding = 7;
 - (void)setImage:(NSString*)imageURL forState:(UIControlState)state {
   TTButtonContent* content = [self contentForState:state];
   content.imageURL = imageURL;
+  [self setNeedsDisplay];
 }
 
 - (TTStyle*)styleForState:(UIControlState)state {
@@ -372,6 +421,7 @@ static const CGFloat kVPadding = 7;
 - (void)setStyle:(TTStyle*)style forState:(UIControlState)state {
   TTButtonContent* content = [self contentForState:state];
   content.style = style;
+  [self setNeedsDisplay];
 }
 
 - (void)setStylesWithSelector:(NSString*)selector {
@@ -397,6 +447,37 @@ static const CGFloat kVPadding = 7;
   } else if (!content.image) {
     [content reload];
   }
+}
+
+- (CGRect)rectForImage {
+  TTStyle* style = [self styleForCurrentState];
+  if (style) {
+    TTStyleContext* context = [[[TTStyleContext alloc] init] autorelease];
+    context.delegate = self;
+    
+    TTPartStyle* imagePartStyle = [style styleForPart:@"image"];
+    if (imagePartStyle) {
+      TTImageStyle* imageStyle = [imagePartStyle.style firstStyleOfClass:[TTImageStyle class]];
+      TTBoxStyle* imageBoxStyle = [imagePartStyle.style firstStyleOfClass:[TTBoxStyle class]];
+      CGSize imageSize = [imagePartStyle.style addToSize:CGSizeZero context:context];
+
+      CGRect frame = context.contentFrame;
+      if (_isVertical) {
+        frame = self.bounds;
+        frame.origin.x += imageBoxStyle.margin.left;
+        frame.origin.y += imageBoxStyle.margin.top;
+      } else {
+        frame.size = imageSize;
+        frame.origin.x += imageBoxStyle.margin.left;
+        frame.origin.y += imageBoxStyle.margin.top;
+      }
+
+      UIImage* image = [self imageForCurrentState];
+      return [image convertRect:frame withContentMode:imageStyle.contentMode];
+    }
+  }
+
+  return CGRectZero;
 }
 
 @end

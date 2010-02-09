@@ -1,11 +1,27 @@
-#import "Three20/TTGlobal.h"
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+#import "Three20/TTURLMap.h"
+#import "Three20/TTModel.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define TT_NULL_PHOTO_INDEX NSIntegerMax
-#define TT_INFINITE_PHOTO_INDEX NSIntegerMax
 
-@protocol TTPhoto, TTPhotoSourceDelegate;
+@protocol TTPhoto;
 @class TTURLRequest;
 
 typedef enum {
@@ -18,9 +34,7 @@ typedef enum {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-@protocol TTPhotoSource <TTPersistable, TTLoadable>
-
-@property(nonatomic,readonly) NSMutableArray* delegates;
+@protocol TTPhotoSource <TTModel, TTURLObject>
 
 /**
  * The title of this collection of photos.
@@ -42,20 +56,11 @@ typedef enum {
  */
 - (id<TTPhoto>)photoAtIndex:(NSInteger)index;
 
-/**
- * Loads a range of photos asynchronously.
- *
- * @param fromIndex The starting index.
- * @param toIndex The ending index, or -1 to load the remainder of photos.
- */
-- (void)loadPhotosFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex
-        cachePolicy:(TTURLRequestCachePolicy)cachePolicy;
-
 @end
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-@protocol TTPhoto <TTPersistable>
+@protocol TTPhoto <NSObject, TTURLObject>
 
 /**
  * The photo source that the photo belongs to.
@@ -78,22 +83,8 @@ typedef enum {
 @property(nonatomic,copy) NSString* caption;
 
 /**
- * Gets the url of one of the differently sized versions of the photo.
+ * Gets the URL of one of the differently sized versions of the photo.
  */
-- (NSString*)urlForVersion:(TTPhotoVersion)version;
-
-@end
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-@protocol TTPhotoSourceDelegate <NSObject>
-
-- (void)photoSourceDidStartLoad:(id<TTPhotoSource>)photoSource;
-
-- (void)photoSourceDidFinishLoad:(id<TTPhotoSource>)photoSource;
-
-- (void)photoSource:(id<TTPhotoSource>)photoSource didFailLoadWithError:(NSError*)error;
-
-- (void)photoSourceDidCancelLoad:(id<TTPhotoSource>)photoSource;
+- (NSString*)URLForVersion:(TTPhotoVersion)version;
 
 @end

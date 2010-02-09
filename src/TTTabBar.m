@@ -1,8 +1,27 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTTabBar.h"
+
+#import "Three20/TTGlobalUI.h"
+
 #import "Three20/TTImageView.h"
 #import "Three20/TTLabel.h"
 #import "Three20/TTLayout.h"
-#import "Three20/TTDefaultStyleSheet.h"
+#import "Three20/TTStyleSheet.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // global
@@ -100,9 +119,9 @@ static const NSInteger kMaxBadgeNumber = 99;
 }
 
 - (void)dealloc {
-  [_tabStyle release];
-  [_tabItems release];
-  [_tabViews release];
+  TT_RELEASE_SAFELY(_tabStyle);
+  TT_RELEASE_SAFELY(_tabItems);
+  TT_RELEASE_SAFELY(_tabViews);
   [super dealloc];
 }
 
@@ -213,7 +232,7 @@ static const NSInteger kMaxBadgeNumber = 99;
 - (void)updateOverflow {
   if (_scrollView.contentOffset.x < (_scrollView.contentSize.width-self.width)) {
     if (!_overflowRight) {
-      _overflowRight = [[TTView alloc] initWithFrame:CGRectZero];
+      _overflowRight = [[TTView alloc] init];
       _overflowRight.style = TTSTYLE(tabOverflowRight);
       _overflowRight.userInteractionEnabled = NO;
       _overflowRight.backgroundColor = [UIColor clearColor];
@@ -228,7 +247,7 @@ static const NSInteger kMaxBadgeNumber = 99;
   }
   if (_scrollView.contentOffset.x > 0) {
     if (!_overflowLeft) {
-      _overflowLeft = [[TTView alloc] initWithFrame:CGRectZero];
+      _overflowLeft = [[TTView alloc] init];
       _overflowLeft.style = TTSTYLE(tabOverflowLeft);
       _overflowLeft.userInteractionEnabled = NO;
       _overflowLeft.backgroundColor = [UIColor clearColor];
@@ -261,7 +280,7 @@ static const NSInteger kMaxBadgeNumber = 99;
     _overflowLeft = nil;
     _overflowRight = nil;
 
-    _scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
+    _scrollView = [[UIScrollView alloc] init];
     _scrollView.scrollEnabled = YES;
     _scrollView.scrollsToTop = NO;
     _scrollView.showsVerticalScrollIndicator = NO;
@@ -275,9 +294,9 @@ static const NSInteger kMaxBadgeNumber = 99;
 }
 
 - (void)dealloc {
-  [_overflowLeft release];
-  [_overflowRight release];
-  [_scrollView release];
+  TT_RELEASE_SAFELY(_overflowLeft);
+  TT_RELEASE_SAFELY(_overflowRight);
+  TT_RELEASE_SAFELY(_scrollView);
   [super dealloc];
 }
 
@@ -398,7 +417,7 @@ static const NSInteger kMaxBadgeNumber = 99;
 @synthesize tabItem = _tabItem;
 
 - (id)initWithItem:(TTTabItem*)tabItem tabBar:(TTTabBar*)tabBar {
-  if (self = [self initWithFrame:CGRectZero]) {
+  if (self = [self init]) {
     _badge = nil;
     
     self.tabItem = tabItem;
@@ -407,8 +426,8 @@ static const NSInteger kMaxBadgeNumber = 99;
 }
 
 - (void)dealloc {
-  [_tabItem release];
-  [_badge release];
+  TT_RELEASE_SAFELY(_tabItem);
+  TT_RELEASE_SAFELY(_badge);
   [super dealloc];
 }
 
@@ -417,7 +436,7 @@ static const NSInteger kMaxBadgeNumber = 99;
 - (void)updateBadgeNumber {
   if (_tabItem.badgeNumber) {
     if (!_badge) {
-      _badge = [[TTLabel alloc] initWithFrame:CGRectZero];
+      _badge = [[TTLabel alloc] init];
       _badge.style = TTSTYLE(badge);
       _badge.backgroundColor = [UIColor clearColor];
       _badge.userInteractionEnabled = NO;
@@ -489,9 +508,9 @@ static const NSInteger kMaxBadgeNumber = 99;
 }
 
 - (void)dealloc {
-  [_title release];
-  [_icon release];
-  [_object release];
+  TT_RELEASE_SAFELY(_title);
+  TT_RELEASE_SAFELY(_icon);
+  TT_RELEASE_SAFELY(_object);
   [super dealloc];
 }
 

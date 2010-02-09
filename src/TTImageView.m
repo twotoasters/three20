@@ -1,104 +1,115 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTImageView.h"
+
+#import "Three20/TTGlobalCore.h"
+#import "Three20/TTGlobalUI.h"
+
+#import "Three20/TTImageLayer.h"
+
 #import "Three20/TTURLCache.h"
 #import "Three20/TTURLResponse.h"
 #import "Three20/TTShape.h"
-#import "QuartzCore/CALayer.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
+#import "Three20/TTImageViewInternal.h"
 
-@interface TTImageLayer : CALayer {
-  TTImageView* _override;
-}
 
-@property(nonatomic,assign) TTImageView* override;
-
-@end
-
-@implementation TTImageLayer
-
-@synthesize override = _override;
-
-- (id)init {
-  if (self = [super init]) {
-    _override = NO;
-  }
-  return self;
-}
-
-- (void)display {
-  if (_override) {
-    self.contents = (id)_override.image.CGImage;
-  } else {
-    return [super display];
-  }
-}
-
-- (void)dealloc {
-  [super dealloc];
-}
-
-@end
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 @implementation TTImageView
 
-@synthesize delegate = _delegate, url = _url, image = _image, defaultImage = _defaultImage,
-  autoresizesToImage = _autoresizesToImage;
+@synthesize urlPath             = _urlPath;
+@synthesize image               = _image;
+@synthesize defaultImage        = _defaultImage;
+@synthesize autoresizesToImage  = _autoresizesToImage;
+@synthesize delegate            = _delegate;
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// NSObject
+#pragma mark -
+#pragma mark NSObject
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
-    _delegate = nil;
-    _request = nil;
-    _url = nil;
-    _image = nil;
-    _defaultImage = nil;
     _autoresizesToImage = NO;
-    self.opaque = YES;
   }
   return self;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)dealloc {
   _delegate = nil;
   [_request cancel];
-  [_request release];
-  [_url release];
-  [_image release];
-  [_defaultImage release];
+  TT_RELEASE_SAFELY(_request);
+  TT_RELEASE_SAFELY(_urlPath);
+  TT_RELEASE_SAFELY(_image);
+  TT_RELEASE_SAFELY(_defaultImage);
   [super dealloc];
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// UIView
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark UIView
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 + (Class)layerClass {
   return [TTImageLayer class];
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)drawRect:(CGRect)rect {
   if (self.style) {
     [super drawRect:rect];
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// TTView
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark TTView
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)drawContent:(CGRect)rect {
-  if (_image) {
+  if (nil != _image) {
     [_image drawInRect:rect contentMode:self.contentMode];
   } else {
     [_defaultImage drawInRect:rect contentMode:self.contentMode];
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// TTURLRequestDelegate
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark TTURLRequestDelegate
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)requestDidStartLoad:(TTURLRequest*)request {
   [_request release];
   _request = [request retain];
@@ -109,17 +120,19 @@
   }
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)requestDidFinishLoad:(TTURLRequest*)request {
   TTURLImageResponse* response = request.response;
-  self.image = response.image;
+  [self setImage:response.image];
   
-  [_request release];
-  _request = nil;
+  TT_RELEASE_SAFELY(_request);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)request:(TTURLRequest*)request didFailLoadWithError:(NSError*)error {
-  [_request release];
-  _request = nil;
+  TT_RELEASE_SAFELY(_request);
 
   [self imageViewDidFailLoadWithError:error];
   if ([_delegate respondsToSelector:@selector(imageView:didFailLoadWithError:)]) {
@@ -127,9 +140,10 @@
   }
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)requestDidCancelLoad:(TTURLRequest*)request {
-  [_request release];
-  _request = nil;
+  TT_RELEASE_SAFELY(_request);
 
   [self imageViewDidFailLoadWithError:nil];
   if ([_delegate respondsToSelector:@selector(imageView:didFailLoadWithError:)]) {
@@ -137,9 +151,14 @@
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// TTStyleDelegate
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark TTStyleDelegate
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)drawLayer:(TTStyleContext*)context withStyle:(TTStyle*)style {
   if ([style isKindOfClass:[TTContentStyle class]]) {
     CGContextRef ctx = UIGraphicsGetCurrentContext();
@@ -155,83 +174,38 @@
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// public
 
-- (void)setUrl:(NSString*)url {
-  if (self.image && _url && [url isEqualToString:_url])
-    return;
-  
-  [self stopLoading];
-  [_url release];
-  _url = [url retain];
-  
-  if (!_url || !_url.length) {
-    if (self.image != _defaultImage) {
-      self.image = _defaultImage;
-    }
-  } else {
-    [self reload];
-  }
-}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark TTURLRequestDelegate
 
-- (void)setImage:(UIImage*)image {
-  if (image != _image) {
-    [_image release];
-    _image = [image retain];
 
-    TTImageLayer* layer = (TTImageLayer*)self.layer;
-    if (self.style) {
-      layer.override = nil;
-      [self setNeedsDisplay];
-    } else {
-      // This is dramatically faster than calling drawRect.  Since we don't have any styles
-      // to draw in this case, we can take this shortcut.
-      layer.override = self;
-      [layer setNeedsDisplay];
-    }
-    
-    CGRect frame = self.frame;
-    if (_autoresizesToImage) {
-      self.frame = CGRectMake(frame.origin.x, frame.origin.y, image.size.width, image.size.height);
-    } else {
-      if (!frame.size.width && !frame.size.height) {
-        self.frame = CGRectMake(frame.origin.x, frame.origin.y, image.size.width, image.size.height);
-      } else if (frame.size.width && !frame.size.height) {
-        self.frame = CGRectMake(frame.origin.x, frame.origin.y,
-          frame.size.width, floor((image.size.height/image.size.width) * frame.size.width));
-      } else if (frame.size.height && !frame.size.width) {
-        self.frame = CGRectMake(frame.origin.x, frame.origin.y,
-          floor((image.size.width/image.size.height) * frame.size.height), frame.size.height);
-      }
-    }
-
-    if (!_defaultImage || image != _defaultImage) {
-      [self imageViewDidLoadImage:image];
-      if ([_delegate respondsToSelector:@selector(imageView:didLoadImage:)]) {
-        [_delegate imageView:self didLoadImage:image];
-      }
-    }
-  }
-}
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)isLoading {
   return !!_request;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)isLoaded {
-  return self.image && self.image != _defaultImage;
+  return nil != _image && _image != _defaultImage;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)reload {
-  if (!_request && _url) {
-    UIImage* image = [[TTURLCache sharedCache] imageForURL:_url];
-    if (image) {
+  if (nil == _request && nil != _urlPath) {
+    UIImage* image = [[TTURLCache sharedCache] imageForURL:_urlPath];
+
+    if (nil != image) {
       self.image = image;
+
     } else {
-      TTURLRequest* request = [TTURLRequest requestWithURL:_url delegate:self];
+      TTURLRequest* request = [TTURLRequest requestWithURL:_urlPath delegate:self];
       request.response = [[[TTURLImageResponse alloc] init] autorelease];
-      if (_url && ![request send]) {
+
+      if (![request send]) {
         // Put the default image in place while waiting for the request to load
         if (_defaultImage && self.image != _defaultImage) {
           self.image = _defaultImage;
@@ -241,17 +215,78 @@
   }
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)stopLoading {
   [_request cancel];
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)imageViewDidStartLoad {
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)imageViewDidLoadImage:(UIImage*)image {
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)imageViewDidFailLoadWithError:(NSError*)error {
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark public
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)unsetImage {
+  [self stopLoading];
+  self.image = nil;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)setUrlPath:(NSString*)urlPath {
+  // Check for no changes.
+  if (nil != _image && nil != _urlPath && [urlPath isEqualToString:_urlPath]) {
+    return;
+  }
+  
+  [self stopLoading];
+
+  {
+    NSString* urlPathCopy = [urlPath copy];
+    [_urlPath release];
+    _urlPath = urlPathCopy;
+  }
+  
+  if (nil == _urlPath || 0 == _urlPath.length) {
+    // Setting the url path to an empty/nil path, so let's restore the default image.
+    self.image = _defaultImage;
+
+  } else {
+    [self reload];
+  }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Deprecated
+- (void)setURL:(NSString*)urlPath {
+  [self setUrlPath:urlPath];
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Deprecated
+- (NSString*)URL {
+  return [self urlPath];
+}
+
 
 @end

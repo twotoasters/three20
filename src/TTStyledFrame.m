@@ -1,6 +1,25 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTStyledFrame.h"
+
+#import "Three20/TTGlobalCore.h"
+#import "Three20/TTGlobalUI.h"
+
 #import "Three20/TTStyledNode.h"
-#import "Three20/TTDefaultStyleSheet.h"
 #import "Three20/TTShape.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +41,7 @@
 }
 
 - (void)dealloc {
-  [_nextFrame release];
+  TT_RELEASE_SAFELY(_nextFrame);
   [super dealloc];
 }
 
@@ -104,8 +123,8 @@
 }
 
 - (void)dealloc {
-  [_firstChildFrame release];
-  [_style release];
+  TT_RELEASE_SAFELY(_firstChildFrame);
+  TT_RELEASE_SAFELY(_style);
   [super dealloc];
 }
 
@@ -142,7 +161,7 @@
 }
 
 - (void)drawInRect:(CGRect)rect {
-  if (_style) {
+  if (_style && !CGRectIsEmpty(_bounds)) {
     TTStyleContext* context = [[[TTStyleContext alloc] init] autorelease];
     context.delegate = self;
     context.frame = rect;
@@ -217,8 +236,8 @@
 }
 
 - (void)dealloc {
-  [_text release];
-  [_font release];
+  TT_RELEASE_SAFELY(_text);
+  TT_RELEASE_SAFELY(_font);
   [super dealloc];
 }
 
@@ -248,7 +267,7 @@
 }
 
 - (void)dealloc {
-  [_style release];
+  TT_RELEASE_SAFELY(_style);
   [super dealloc];
 }
 

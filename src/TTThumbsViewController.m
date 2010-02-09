@@ -1,92 +1,85 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTThumbsViewController.h"
+
+#import "Three20/TTGlobalCore.h"
+#import "Three20/TTGlobalCoreLocale.h"
+#import "Three20/TTGlobalUI.h"
+#import "Three20/TTGlobalUINavigator.h"
+#import "Three20/TTGlobalStyle.h"
+
 #import "Three20/TTPhotoViewController.h"
-#import "Three20/TTURLRequest.h"
-#import "Three20/TTUnclippedView.h"
-#import "Three20/TTTableField.h"
+#import "Three20/TTNavigator.h"
+#import "Three20/TTTableItem.h"
 #import "Three20/TTURLCache.h"
+#import "Three20/TTPhotoSource.h"
 #import "Three20/TTStyleSheet.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // global
 
-static NSInteger kColumnCount = 4;
 static CGFloat kThumbnailRowHeight = 79;
+static CGFloat kThumbSize = 75;
+static CGFloat kThumbSpacing = 4;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 @implementation TTThumbsDataSource
 
+@synthesize photoSource = _photoSource, delegate = _delegate;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // private
 
 - (BOOL)hasMoreToLoad {
-  return _controller.photoSource.maxPhotoIndex+1 < _controller.photoSource.numberOfPhotos;
+  return _photoSource.maxPhotoIndex+1 < _photoSource.numberOfPhotos;
+}
+
+- (NSInteger)columnCount {
+  CGFloat width = TTScreenBounds().size.width;
+  return round((width - kThumbSpacing*2) / (kThumbSize+kThumbSpacing));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // NSObject
 
-- (id)initWithController:(TTThumbsViewController*)controller {
+- (id)initWithPhotoSource:(id<TTPhotoSource>)photoSource
+      delegate:(id<TTThumbsTableViewCellDelegate>)delegate {
   if (self = [super init]) {
-    _controller = controller;
-    _photoSource = [_controller.photoSource retain];
-    [_photoSource.delegates addObject:self];
+    _photoSource = [photoSource retain];
+    _delegate = delegate;
   }
   return self;
 }
 
 - (void)dealloc {
-  [_photoSource.delegates removeObject:self];
-  [_photoSource release];
+  TT_RELEASE_SAFELY(_photoSource);
   [super dealloc];
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// TTURLRequestDelegate
-
-- (void)photoSourceDidStartLoad:(id<TTPhotoSource>)photoSource {
-  [self dataSourceDidStartLoad];
-}
-
-- (void)photoSourceDidFinishLoad:(id<TTPhotoSource>)photoSource {
-  [self dataSourceDidFinishLoad];
-}
-
-- (void)photoSource:(id<TTPhotoSource>)photoSource didFailLoadWithError:(NSError*)error {
-  [self dataSourceDidFailLoadWithError:error];
-}
-
-- (void)photoSourceDidCancelLoad:(id<TTPhotoSource>)photoSource {
-  [self dataSourceDidCancelLoad];
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// TTThumbsTableViewCellDelegate
-
-- (void)thumbsTableViewCell:(TTThumbsTableViewCell*)cell didSelectPhoto:(id<TTPhoto>)photo {
-  [_controller.delegate thumbsViewController:_controller didSelectPhoto:photo];
-    
-  BOOL shouldNavigate = YES;
-  if ([_controller.delegate
-       respondsToSelector:@selector(thumbsViewController:shouldNavigateToPhoto:)]) {
-    shouldNavigate = [_controller.delegate thumbsViewController:_controller
-                                           shouldNavigateToPhoto:photo];
-  }
-
-  if (shouldNavigate) {
-    TTPhotoViewController* controller = [_controller createPhotoViewController];
-    controller.centerPhoto = photo;
-    [_controller.navigationController pushViewController:controller animated:YES];  
-  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // UITableViewDataSource
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  NSInteger maxIndex = _controller.photoSource.maxPhotoIndex+1;
-  if (!_controller.photoSource.isLoading && maxIndex > 0) {
-    NSInteger count =  ceil((maxIndex / kColumnCount) + (maxIndex % kColumnCount ? 1 : 0));
+  NSInteger maxIndex = _photoSource.maxPhotoIndex;
+  NSInteger columnCount = self.columnCount;
+  if (maxIndex >= 0) {
+    maxIndex += 1;
+    NSInteger count =  ceil((maxIndex / columnCount) + (maxIndex % columnCount ? 1 : 0));
     if (self.hasMoreToLoad) {
       return count + 1;
     } else {
@@ -100,40 +93,27 @@ static CGFloat kThumbnailRowHeight = 79;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // TTTableViewDataSource
 
-- (NSDate*)loadedTime {
-  return _controller.photoSource.loadedTime;
-}
-
-- (BOOL)isLoading {
-  return _controller.photoSource.isLoading;
-}
-
-- (BOOL)isLoadingMore {
-  return _controller.photoSource.isLoadingMore;
-}
-
-- (BOOL)isLoaded {
-  return _controller.photoSource.isLoaded;
-}
-
-- (BOOL)isOutdated {
-  return _controller.photoSource.isOutdated;
-}
-
-- (BOOL)isEmpty {
-  return _controller.photoSource.isEmpty;
+- (id<TTModel>)model {
+  return _photoSource;
 }
 
 - (id)tableView:(UITableView*)tableView objectForRowAtIndexPath:(NSIndexPath*)indexPath {
   if (indexPath.row == [tableView numberOfRowsInSection:0]-1 && self.hasMoreToLoad) {
-    NSString* title = TTLocalizedString(@"Load More Photos...", @"");
-    NSString* subtitle = [NSString stringWithFormat:
-      TTLocalizedString(@"Showing %d of %d Photos", @""), _controller.photoSource.maxPhotoIndex+1,
-      _controller.photoSource.numberOfPhotos];
-
-    return [[[TTMoreButtonTableField alloc] initWithText:title subtitle:subtitle] autorelease];
+    NSString* text = TTLocalizedString(@"Load More Photos...", @"");
+    NSString* caption = nil;
+    if (_photoSource.numberOfPhotos == -1) {
+      caption = [NSString stringWithFormat:TTLocalizedString(@"Showing %@ Photos", @""),
+                                           TTFormatInteger(_photoSource.maxPhotoIndex+1)];
+    } else {
+      caption = [NSString stringWithFormat:TTLocalizedString(@"Showing %@ of %@ Photos", @""),
+                                           TTFormatInteger(_photoSource.maxPhotoIndex+1),
+                                           TTFormatInteger(_photoSource.numberOfPhotos)];
+    }
+    
+    return [TTTableMoreButton itemWithText:text subtitle:caption];
   } else {
-    return [_controller.photoSource photoAtIndex:indexPath.row * kColumnCount];
+    NSInteger columnCount = self.columnCount;
+    return [_photoSource photoAtIndex:indexPath.row * columnCount];
   }
 }
 
@@ -145,18 +125,39 @@ static CGFloat kThumbnailRowHeight = 79;
   }
 }
 
-- (void)tableView:(UITableView*)tableView prepareCell:(UITableViewCell*)cell
-        forRowAtIndexPath:(NSIndexPath*)indexPath {
+- (void)tableView:(UITableView*)tableView cell:(UITableViewCell*)cell
+        willAppearAtIndexPath:(NSIndexPath*)indexPath {
   if ([cell isKindOfClass:[TTThumbsTableViewCell class]]) {
     TTThumbsTableViewCell* thumbsCell = (TTThumbsTableViewCell*)cell;
-    thumbsCell.delegate = self;
+    thumbsCell.delegate = _delegate;
+    thumbsCell.columnCount = self.columnCount;
   }
 }
 
-- (void)load:(TTURLRequestCachePolicy)cachePolicy nextPage:(BOOL)nextPage {
-  NSInteger index = nextPage ? _controller.photoSource.maxPhotoIndex : 0;
-  [_controller.photoSource loadPhotosFromIndex:index toIndex:TT_INFINITE_PHOTO_INDEX
-                           cachePolicy:cachePolicy];
+- (NSIndexPath*)tableView:(UITableView*)tableView willInsertObject:(id)object
+                atIndexPath:(NSIndexPath*)indexPath {
+  return nil;
+}
+
+- (NSIndexPath*)tableView:(UITableView*)tableView willRemoveObject:(id)object
+                atIndexPath:(NSIndexPath*)indexPath {
+  return nil;
+}
+
+- (NSString*)titleForEmpty {
+  return TTLocalizedString(@"No Photos", @"");
+}
+
+- (NSString*)subtitleForEmpty {
+  return TTLocalizedString(@"This photo set contains no photos.", @"");
+}
+
+- (UIImage*)imageForError:(NSError*)error {
+  return TTIMAGE(@"bundle://Three20.bundle/images/photoDefault.png");
+}
+
+- (NSString*)subtitleForError:(NSError*)error {
+  return TTLocalizedString(@"Unable to load this photo set.", @"");
 }
 
 @end
@@ -182,22 +183,48 @@ static CGFloat kThumbnailRowHeight = 79;
   }
 }
 
+- (void)updateTableLayout {
+  self.tableView.contentInset = UIEdgeInsetsMake(TTBarsHeight()+4, 0, 0, 0);
+  self.tableView.scrollIndicatorInsets = UIEdgeInsetsMake(TTBarsHeight(), 0, 0, 0);
+}
+
+- (NSString*)URLForPhoto:(id<TTPhoto>)photo {
+  if ([photo respondsToSelector:@selector(URLValueWithName:)]) {
+    return [photo URLValueWithName:@"TTPhotoViewController"];
+  } else {
+    return nil;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // NSObject
+
+- (id)initWithDelegate:(id<TTThumbsViewControllerDelegate>)delegate {
+  if (self = [self init]) {
+    self.delegate = delegate;
+  }
+  return self;
+}
+
+- (id)initWithQuery:(NSDictionary*)query {
+  id<TTThumbsViewControllerDelegate> delegate = [query objectForKey:@"delegate"];
+  if (delegate) {
+    return [self initWithDelegate:delegate];
+  } else {
+    return [self init];
+  }
+}
 
 - (id)init {
   if (self = [super init]) {
     _delegate = nil;
     _photoSource = nil;
     
-    self.hidesBottomBarWhenPushed = YES;
+    self.statusBarStyle = UIStatusBarStyleBlackTranslucent;
     self.navigationBarStyle = UIBarStyleBlackTranslucent;
     self.navigationBarTintColor = nil;
-    self.statusBarStyle = UIStatusBarStyleBlackTranslucent;
-
-    if ([self respondsToSelector:@selector(setWantsFullScreenLayout:)]) {
-      [self setWantsFullScreenLayout:YES];
-    }
+    self.wantsFullScreenLayout = YES;
+    self.hidesBottomBarWhenPushed = YES;
   }
   
   return self;
@@ -205,7 +232,7 @@ static CGFloat kThumbnailRowHeight = 79;
 
 - (void)dealloc {
   [_photoSource.delegates removeObject:self];
-  [_photoSource release];
+  TT_RELEASE_SAFELY(_photoSource);
   [super dealloc];
 }
 
@@ -213,98 +240,104 @@ static CGFloat kThumbnailRowHeight = 79;
 // UIViewController
 
 - (void)loadView {
-  CGRect screenFrame = [UIScreen mainScreen].bounds;
-  self.view = [[[TTUnclippedView alloc] initWithFrame:screenFrame] autorelease];
-  self.view.autoresizesSubviews = YES;
-	self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-
-  CGFloat y = [self respondsToSelector:@selector(setWantsFullScreenLayout:)] ? 0 : -CHROME_HEIGHT;
-  CGRect innerFrame = CGRectMake(0, y,
-                                 screenFrame.size.width, screenFrame.size.height + CHROME_HEIGHT);
-  UIView* innerView = [[[UIView alloc] initWithFrame:innerFrame] autorelease];
-  innerView.backgroundColor = TTSTYLEVAR(backgroundColor);
-  [self.view addSubview:innerView];
+  [super loadView];
   
-  CGRect tableFrame = CGRectMake(0, CHROME_HEIGHT,
-                                 screenFrame.size.width, screenFrame.size.height - CHROME_HEIGHT);
-  self.tableView = [[[UITableView alloc] initWithFrame:tableFrame
-                                         style:UITableViewStylePlain] autorelease];
   self.tableView.rowHeight = kThumbnailRowHeight;
-	self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth
-    | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+	self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
   self.tableView.backgroundColor = TTSTYLEVAR(backgroundColor);
   self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-  self.tableView.contentInset = UIEdgeInsetsMake(4, 0, 0, 0);
-  self.tableView.clipsToBounds = NO;
-  [innerView addSubview:self.tableView];
+  [self updateTableLayout];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   [self suspendLoadingThumbnails:NO];
-
-  if (![self respondsToSelector:@selector(setWantsFullScreenLayout:)]) {
-    if (!self.nextViewController) {
-      self.view.superview.frame = CGRectOffset(self.view.superview.frame, 0, TOOLBAR_HEIGHT);
-    }
-  }
 }
-
-- (void)viewWillDisappear:(BOOL)animated {
-  [super viewWillDisappear:animated];
-
-  if (![self respondsToSelector:@selector(setWantsFullScreenLayout:)]) {
-    self.view.superview.frame = CGRectOffset(self.view.superview.frame, 0, TOOLBAR_HEIGHT);
-  }
-}  
 
 - (void)viewDidDisappear:(BOOL)animated {
   [self suspendLoadingThumbnails:YES];
   [super viewDidDisappear:animated];
 }
 
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+  return TTIsSupportedOrientation(interfaceOrientation);
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+  [self updateTableLayout];
+  [self.tableView reloadData];
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// UIViewController (TTCategory)
+
+- (BOOL)persistView:(NSMutableDictionary*)state {
+  NSString* delegate = [[TTNavigator navigator] pathForObject:_delegate];
+  if (delegate) {
+    [state setObject:delegate forKey:@"delegate"];
+  }
+  return [super persistView:state];
+}
+
+- (void)restoreView:(NSDictionary*)state {
+  [super restoreView:state];
+  NSString* delegate = [state objectForKey:@"delegate"];
+  if (delegate) {
+    self.delegate = [[TTNavigator navigator] objectForPath:delegate];
+  }
+}
+
+- (void)setDelegate:(id<TTThumbsViewControllerDelegate>)delegate {
+  _delegate = delegate;
+
+  if (_delegate) {
+    self.navigationItem.leftBarButtonItem =
+      [[[UIBarButtonItem alloc] initWithCustomView:[[[UIView alloc] init] autorelease]] autorelease];
+    self.navigationItem.rightBarButtonItem =
+      [[[UIBarButtonItem alloc] initWithTitle:TTLocalizedString(@"Done", @"")
+                                style:UIBarButtonItemStyleBordered
+                                target:self
+                                action:@selector(removeFromSupercontroller)] autorelease];
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// TTViewController
+// TTModelViewController
 
-- (id<TTPersistable>)viewObject {
-  return _photoSource;
-}
-
-- (void)showObject:(id)object inView:(NSString*)viewType withState:(NSDictionary*)state {
-  [super showObject:object inView:viewType withState:state];
-
-  self.photoSource = (id<TTPhotoSource>)object;
-}
-
-- (UIImage*)imageForNoData {
-  return TTIMAGE(@"bundle://Three20.bundle/images/photoDefault.png");
-}
-
-- (NSString*)titleForNoData {
-  return TTLocalizedString(@"No Photos", @"");
-}
-
-- (NSString*)subtitleForNoData {
-  return TTLocalizedString(@"This photo set contains no photos.", @"");
-}
-
-- (UIImage*)imageForError:(NSError*)error {
-  return TTIMAGE(@"bundle://Three20.bundle/images/photoDefault.png");
-}
-
-- (NSString*)titleForError:(NSError*)error {
-  return TTLocalizedString(@"Error", @"");
-}
-
-- (NSString*)subtitleForError:(NSError*)error {
-  return TTLocalizedString(@"This photo set could not be loaded.", @"");
+- (void)didRefreshModel {
+  [super didRefreshModel];
+  self.title = _photoSource.title;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // TTTableViewController
 
-- (id<TTTableViewDataSource>)createDataSource {
-  return [[[TTThumbsDataSource alloc] initWithController:self] autorelease];
+- (CGRect)rectForOverlayView {
+  return TTRectContract(CGRectOffset([super rectForOverlayView], 0, TTBarsHeight()-_tableView.top),
+                        0, TTBarsHeight());
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// TTThumbsTableViewCellDelegate
+
+- (void)thumbsTableViewCell:(TTThumbsTableViewCell*)cell didSelectPhoto:(id<TTPhoto>)photo {
+  [_delegate thumbsViewController:self didSelectPhoto:photo];
+    
+  BOOL shouldNavigate = YES;
+  if ([_delegate respondsToSelector:@selector(thumbsViewController:shouldNavigateToPhoto:)]) {
+    shouldNavigate = [_delegate thumbsViewController:self shouldNavigateToPhoto:photo];
+  }
+
+  if (shouldNavigate) {
+    NSString* URL = [self URLForPhoto:photo];
+    if (URL) {
+      TTOpenURL(URL);
+    } else {
+      TTPhotoViewController* controller = [self createPhotoViewController];
+      controller.centerPhoto = photo;
+      [self.navigationController pushViewController:controller animated:YES];  
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -316,12 +349,16 @@ static CGFloat kThumbnailRowHeight = 79;
     _photoSource = [photoSource retain];
 
     self.title = _photoSource.title;
-    [self invalidateView];
+    self.dataSource = [self createDataSource];
   }
 }
 
 - (TTPhotoViewController*)createPhotoViewController {
   return [[[TTPhotoViewController alloc] init] autorelease];
+}
+
+- (id<TTTableViewDataSource>)createDataSource {
+  return [[[TTThumbsDataSource alloc] initWithPhotoSource:_photoSource delegate:self] autorelease];
 }
 
 @end

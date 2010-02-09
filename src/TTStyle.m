@@ -1,4 +1,24 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTStyle.h"
+
+#import "Three20/TTGlobalCore.h"
+#import "Three20/TTGlobalUI.h"
+
 #import "Three20/TTShape.h"
 #import "Three20/TTURLCache.h"
 
@@ -32,8 +52,8 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_shape release];
-  [_font release];
+  TT_RELEASE_SAFELY(_shape);
+  TT_RELEASE_SAFELY(_font);
   [super dealloc];
 }
 
@@ -58,7 +78,8 @@ static const NSInteger kDefaultLightSource = 125;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // private
 
-- (CGGradientRef)newGradientWithColors:(UIColor**)colors count:(int)count {
+- (CGGradientRef)newGradientWithColors:(UIColor**)colors locations:(CGFloat*)locations
+                 count:(int)count {
   CGFloat* components = malloc(sizeof(CGFloat)*4*count);
   for (int i = 0; i < count; ++i) {
     UIColor* color = colors[i];
@@ -79,9 +100,13 @@ static const NSInteger kDefaultLightSource = 125;
 
   CGContextRef context = UIGraphicsGetCurrentContext();
   CGColorSpaceRef space = CGBitmapContextGetColorSpace(context);
-  CGGradientRef gradient = CGGradientCreateWithColorComponents(space, components, nil, count);
+  CGGradientRef gradient = CGGradientCreateWithColorComponents(space, components, locations, count);
   free(components);
   return gradient;
+}
+
+- (CGGradientRef)newGradientWithColors:(UIColor**)colors count:(int)count {
+  return [self newGradientWithColors:colors locations:nil count:count];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,12 +124,17 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_next release];
+  TT_RELEASE_SAFELY(_next);
   [super dealloc];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // public
+
+- (TTStyle*)next:(TTStyle*)next {
+  self.next = next;
+  return self;
+}
 
 - (void)draw:(TTStyleContext*)context {
   [self.next draw:context];
@@ -203,8 +233,8 @@ static const NSInteger kDefaultLightSource = 125;
 // NSObject
 
 - (void)dealloc {
-  [_name release];
-  [_style release];
+  TT_RELEASE_SAFELY(_name);
+  TT_RELEASE_SAFELY(_style);
   [super dealloc];
 }
 
@@ -250,7 +280,7 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_shape release];
+  TT_RELEASE_SAFELY(_shape);
   [super dealloc];
 }
 
@@ -423,8 +453,9 @@ static const NSInteger kDefaultLightSource = 125;
 @implementation TTTextStyle
 
 @synthesize font = _font, color = _color, shadowColor = _shadowColor, shadowOffset = _shadowOffset,
-            minimumFontSize = _minimumFontSize, textAlignment = _textAlignment,
-            verticalAlignment = _verticalAlignment, lineBreakMode = _lineBreakMode;
+            minimumFontSize = _minimumFontSize, numberOfLines = _numberOfLines,
+            textAlignment = _textAlignment, verticalAlignment = _verticalAlignment,
+            lineBreakMode = _lineBreakMode;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // class public
@@ -481,8 +512,45 @@ static const NSInteger kDefaultLightSource = 125;
   return style;
 }
 
++ (TTTextStyle*)styleWithFont:(UIFont*)font color:(UIColor*)color
+                minimumFontSize:(CGFloat)minimumFontSize
+                shadowColor:(UIColor*)shadowColor shadowOffset:(CGSize)shadowOffset
+                textAlignment:(UITextAlignment)textAlignment
+                verticalAlignment:(UIControlContentVerticalAlignment)verticalAlignment
+                lineBreakMode:(UILineBreakMode)lineBreakMode numberOfLines:(NSInteger)numberOfLines
+                next:(TTStyle*)next {
+  TTTextStyle* style = [[[self alloc] initWithNext:next] autorelease];
+  style.font = font;
+  style.color = color;
+  style.minimumFontSize = minimumFontSize;
+  style.shadowColor = shadowColor;
+  style.shadowOffset = shadowOffset;
+  style.textAlignment = textAlignment;
+  style.verticalAlignment = verticalAlignment;
+  style.lineBreakMode = lineBreakMode;
+  style.numberOfLines = numberOfLines;
+  return style;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // private
+
+- (CGSize)sizeOfText:(NSString*)text withFont:(UIFont*)font size:(CGSize)size {
+  if (_numberOfLines == 1) {
+    return [text sizeWithFont:font];
+  } else {
+    CGSize maxSize = CGSizeMake(size.width, CGFLOAT_MAX);
+    CGSize textSize = [text sizeWithFont:font constrainedToSize:maxSize
+                            lineBreakMode:_lineBreakMode];
+    if (_numberOfLines) {
+      CGFloat maxHeight = font.ttLineHeight * _numberOfLines;
+      if (textSize.height > maxHeight) {
+        textSize.height = maxHeight;
+      }
+    }
+    return textSize;
+  }
+}
 
 - (CGRect)rectForText:(NSString*)text forSize:(CGSize)size withFont:(UIFont*)font {
   CGRect rect = CGRectZero;
@@ -490,7 +558,7 @@ static const NSInteger kDefaultLightSource = 125;
       && _verticalAlignment == UIControlContentVerticalAlignmentTop) {
     rect.size = size;
   } else {
-    CGSize textSize = [text sizeWithFont:font];
+    CGSize textSize = [self sizeOfText:text withFont:font size:size];
 
     if (size.width < textSize.width) {
       size.width = textSize.width;
@@ -529,15 +597,23 @@ static const NSInteger kDefaultLightSource = 125;
   }
 
   CGRect rect = context.contentFrame;
-  CGRect titleRect = [self rectForText:text forSize:rect.size withFont:font];
   
-  titleRect.size = [text drawAtPoint:
-        CGPointMake(titleRect.origin.x+rect.origin.x, titleRect.origin.y+rect.origin.y)
-        forWidth:rect.size.width withFont:font
-        minFontSize:_minimumFontSize ? _minimumFontSize : font.pointSize
-        actualFontSize:nil lineBreakMode:_lineBreakMode
-        baselineAdjustment:UIBaselineAdjustmentAlignCenters];
-  context.contentFrame = titleRect;
+  if (_numberOfLines == 1) {
+    CGRect titleRect = [self rectForText:text forSize:rect.size withFont:font];
+    titleRect.size = [text drawAtPoint:
+          CGPointMake(titleRect.origin.x+rect.origin.x, titleRect.origin.y+rect.origin.y)
+          forWidth:rect.size.width withFont:font
+          minFontSize:_minimumFontSize ? _minimumFontSize : font.pointSize
+          actualFontSize:nil lineBreakMode:_lineBreakMode
+          baselineAdjustment:UIBaselineAdjustmentAlignCenters];
+    context.contentFrame = titleRect;
+  } else {
+    CGRect titleRect = [self rectForText:text forSize:rect.size withFont:font];
+    titleRect = CGRectOffset(titleRect, rect.origin.x, rect.origin.y);
+    rect.size = [text drawInRect:titleRect withFont:font lineBreakMode:_lineBreakMode
+                      alignment:_textAlignment];
+    context.contentFrame = rect;
+  }
 
   CGContextRestoreGState(ctx);
 }
@@ -552,6 +628,7 @@ static const NSInteger kDefaultLightSource = 125;
     _minimumFontSize = 0;
     _shadowColor = nil;
     _shadowOffset = CGSizeZero;
+    _numberOfLines = 1;
     _textAlignment = UITextAlignmentCenter;
     _verticalAlignment = UIControlContentVerticalAlignmentCenter;
     _lineBreakMode = UILineBreakModeTailTruncation;
@@ -560,9 +637,9 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_font release];
-  [_color release];
-  [_shadowColor release];
+  TT_RELEASE_SAFELY(_font);
+  TT_RELEASE_SAFELY(_color);
+  TT_RELEASE_SAFELY(_shadowColor);
   [super dealloc];
 }
 
@@ -592,17 +669,13 @@ static const NSInteger kDefaultLightSource = 125;
     NSString* text = [context.delegate textForLayerWithStyle:self];
     UIFont* font = _font ? _font : context.font;
     
-    CGSize textSize;
-    
     CGFloat maxWidth = context.contentFrame.size.width;
-    if (maxWidth) {
-      textSize = [text sizeWithFont:font];
-      if (textSize.width > maxWidth) {
-        textSize.width = maxWidth;
-      }
-    } else {
-      textSize = [text sizeWithFont:font];
+    if (!maxWidth) {
+      maxWidth = CGFLOAT_MAX;
     }
+    CGFloat maxHeight = _numberOfLines ? _numberOfLines * font.ttLineHeight : CGFLOAT_MAX;
+    CGSize maxSize = CGSizeMake(maxWidth, maxHeight);
+    CGSize textSize = [self sizeOfText:text withFont:font size:maxSize];
     
     size.width += textSize.width;
     size.height += textSize.height;
@@ -701,9 +774,9 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_imageURL release];
-  [_image release];
-  [_defaultImage release];
+  TT_RELEASE_SAFELY(_imageURL);
+  TT_RELEASE_SAFELY(_image);
+  TT_RELEASE_SAFELY(_defaultImage);
   [super dealloc];
 }
 
@@ -713,7 +786,15 @@ static const NSInteger kDefaultLightSource = 125;
 - (void)draw:(TTStyleContext*)context {
   UIImage* image = [self imageForContext:context];
   if (image) {
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextSaveGState(ctx);
+    CGRect rect = [image convertRect:context.contentFrame withContentMode:_contentMode];
+    [context.shape addToPath:rect];
+    CGContextClip(ctx);
+  
     [image drawInRect:context.contentFrame contentMode:_contentMode];
+    
+    CGContextRestoreGState(ctx);
   }
   return [self.next draw:context];
 }
@@ -722,7 +803,9 @@ static const NSInteger kDefaultLightSource = 125;
   if (_size.width || _size.height) {
     size.width += _size.width;
     size.height += _size.height;
-  } else if (_contentMode == UIViewContentModeScaleToFill) {
+  } else if (_contentMode != UIViewContentModeScaleToFill
+             && _contentMode != UIViewContentModeScaleAspectFill
+             && _contentMode != UIViewContentModeScaleAspectFit) {
     UIImage* image = [self imageForContext:context];
     if (image) {
       size.width += image.size.width;
@@ -776,7 +859,7 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_mask release];
+  TT_RELEASE_SAFELY(_mask);
   [super dealloc];
 }
 
@@ -795,6 +878,54 @@ static const NSInteger kDefaultLightSource = 125;
     CGRect maskRect = CGRectMake(0, 0, _mask.size.width, _mask.size.height);
     CGContextClipToMask(ctx, maskRect, _mask.CGImage);
 
+    [self.next draw:context];
+    CGContextRestoreGState(ctx);
+  } else {
+    return [self.next draw:context];
+  }
+}
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+@implementation TTBlendStyle
+
+@synthesize blendMode = _blendMode;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// class public
+
++ (TTBlendStyle*)styleWithBlend:(CGBlendMode)blendMode next:(TTStyle*)next {
+  TTBlendStyle* style = [[[self alloc] initWithNext:next] autorelease];
+  style.blendMode = blendMode;
+  return style;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// NSObject
+
+- (id)initWithNext:(TTStyle*)next {  
+  if (self = [super initWithNext:next]) {
+    _blendMode = kCGBlendModeNormal;
+  }
+  return self;
+}
+
+- (void)dealloc {
+  [super dealloc];
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// TTStyle
+
+- (void)draw:(TTStyleContext*)context {
+  if (_blendMode) {
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextSaveGState(ctx);
+    CGContextSetBlendMode(ctx, _blendMode);
+  
     [self.next draw:context];
     CGContextRestoreGState(ctx);
   } else {
@@ -830,7 +961,7 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_color release];
+  TT_RELEASE_SAFELY(_color);
   [super dealloc];
 }
 
@@ -881,8 +1012,8 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_color1 release];
-  [_color2 release];
+  TT_RELEASE_SAFELY(_color1);
+  TT_RELEASE_SAFELY(_color2);
   [super dealloc];
 }
 
@@ -915,6 +1046,7 @@ static const NSInteger kDefaultLightSource = 125;
 @implementation TTReflectiveFillStyle
 
 @synthesize color = _color;
+@synthesize withBottomHighlight = _withBottomHighlight;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // class public
@@ -922,6 +1054,15 @@ static const NSInteger kDefaultLightSource = 125;
 + (TTReflectiveFillStyle*)styleWithColor:(UIColor*)color next:(TTStyle*)next {
   TTReflectiveFillStyle* style = [[[self alloc] initWithNext:next] autorelease];
   style.color = color;
+  style.withBottomHighlight = NO;
+  return style;
+}
+
++ (TTReflectiveFillStyle*)styleWithColor:(UIColor*)color
+                          withBottomHighlight:(BOOL)withBottomHighlight next:(TTStyle*)next {
+  TTReflectiveFillStyle* style = [[[self alloc] initWithNext:next] autorelease];
+  style.color = color;
+  style.withBottomHighlight = withBottomHighlight;
   return style;
 }
 
@@ -936,7 +1077,7 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_color release];
+  TT_RELEASE_SAFELY(_color);
   [super dealloc];
 }
 
@@ -951,30 +1092,33 @@ static const NSInteger kDefaultLightSource = 125;
   [context.shape addToPath:rect];
   CGContextClip(ctx);
 
+  // Draw the background color
   [_color setFill];
   CGContextFillRect(ctx, rect);
 
-  // XXjoe These numbers are totally biased towards the colors I tested with.  I need to figure out
-  // a formula that works well for all colors
-  UIColor* lighter = nil, *darker = nil;
-  if (_color.value < 0.5) {
-    lighter = HSVCOLOR(_color.hue, ZEROLIMIT(_color.saturation-0.5), ZEROLIMIT(_color.value+0.25));
-    darker = HSVCOLOR(_color.hue, ZEROLIMIT(_color.saturation-0.1), ZEROLIMIT(_color.value+0.1));
-  } else if (_color.saturation > 0.6) {
-    lighter = HSVCOLOR(_color.hue, _color.saturation*0.3, _color.value*1);
-    darker = HSVCOLOR(_color.hue, _color.saturation*0.9, _color.value+0.05);
+  // The highlights are drawn using an overlayed, semi-transparent gradient.
+  // The values here are absolutely arbitrary. They were nabbed by inspecting the colors of
+  // the "Delete Contact" button in the Contacts app.
+  UIColor* topStartHighlight = [UIColor colorWithWhite:1.0 alpha:0.685];
+  UIColor* topEndHighlight = [UIColor colorWithWhite:1.0 alpha:0.13];
+  UIColor* clearColor = [UIColor colorWithWhite:1.0 alpha:0.0];
+
+  UIColor* botEndHighlight;
+  if( _withBottomHighlight ) {
+    botEndHighlight = [UIColor colorWithWhite:1.0 alpha:0.27];
   } else {
-    lighter = HSVCOLOR(_color.hue, _color.saturation*0.4, _color.value*1.2);
-    darker = HSVCOLOR(_color.hue, _color.saturation*0.9, _color.value+0.05);
+    botEndHighlight = clearColor;
   }
-//  //UIColor* lighter = [_color multiplyHue:1 saturation:0.5 value:1.35];
-//  //UIColor* darker = [_color multiplyHue:1 saturation:0.88 value:1.05];
-  UIColor* colors[] = {lighter, darker};
-  
-  CGGradientRef gradient = [self newGradientWithColors:colors count:2];
+
+  UIColor* colors[] = {
+    topStartHighlight, topEndHighlight,
+    clearColor,
+    clearColor, botEndHighlight};
+  CGFloat locations[] = {0, 0.5, 0.5, 0.6, 1.0};
+
+  CGGradientRef gradient = [self newGradientWithColors:colors locations:locations count:5];
   CGContextDrawLinearGradient(ctx, gradient, CGPointMake(rect.origin.x, rect.origin.y),
-    CGPointMake(rect.origin.x, rect.origin.y+rect.size.height*0.5),
-    kCGGradientDrawsBeforeStartLocation);
+    CGPointMake(rect.origin.x, rect.origin.y+rect.size.height), 0);
   CGGradientRelease(gradient);
 
   CGContextRestoreGState(ctx);
@@ -1015,7 +1159,7 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_color release];
+  TT_RELEASE_SAFELY(_color);
   [super dealloc];
 }
 
@@ -1132,7 +1276,7 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_color release];
+  TT_RELEASE_SAFELY(_color);
   [super dealloc];
 }
 
@@ -1160,6 +1304,76 @@ static const NSInteger kDefaultLightSource = 125;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+@implementation TTHighlightBorderStyle
+
+@synthesize color = _color, highlightColor = _highlightColor, width = _width;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// NSObject
+
++ (TTHighlightBorderStyle*)styleWithColor:(UIColor*)color highlightColor:(UIColor*)highlightColor
+                           width:(CGFloat)width next:(TTStyle*)next {
+  TTHighlightBorderStyle* style = [[[self alloc] initWithNext:next] autorelease];
+  style.color = color;
+  style.highlightColor = highlightColor;
+  style.width = width;
+  return style;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// NSObject
+
+- (id)initWithNext:(TTStyle*)next {  
+  if (self = [super initWithNext:next]) {
+    _color = nil;
+    _highlightColor = nil;
+    _width = 1;
+  }
+  return self;
+}
+
+- (void)dealloc {
+  TT_RELEASE_SAFELY(_color);
+  TT_RELEASE_SAFELY(_highlightColor);
+  [super dealloc];
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// TTStyle
+
+- (void)draw:(TTStyleContext*)context {
+  CGContextRef ctx = UIGraphicsGetCurrentContext();
+  CGContextSaveGState(ctx);
+
+  {
+    CGRect strokeRect = CGRectInset(context.frame, _width/2, _width/2);
+    strokeRect.size.height-=2;
+    strokeRect.origin.y++;
+    [context.shape addToPath:strokeRect];
+
+    [_highlightColor setStroke];
+    CGContextSetLineWidth(ctx, _width);
+    CGContextStrokePath(ctx);
+  }
+
+  {
+    CGRect strokeRect = CGRectInset(context.frame, _width/2, _width/2);
+    strokeRect.size.height-=2;
+    [context.shape addToPath:strokeRect];
+
+    [_color setStroke];
+    CGContextSetLineWidth(ctx, _width);
+    CGContextStrokePath(ctx);
+  }
+
+  context.frame = CGRectInset(context.frame, _width, _width * 2);
+  return [self.next draw:context];
+}
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 @implementation TTFourBorderStyle
 
 @synthesize top = _top, right = _right, bottom = _bottom, left = _left, width = _width;
@@ -1178,6 +1392,35 @@ static const NSInteger kDefaultLightSource = 125;
   return style;
 }
 
++ (TTFourBorderStyle*)styleWithTop:(UIColor*)top width:(CGFloat)width next:(TTStyle*)next {
+  TTFourBorderStyle* style = [[[self alloc] initWithNext:next] autorelease];
+  style.top = top;
+  style.width = width;
+  return style;
+}
+
++ (TTFourBorderStyle*)styleWithRight:(UIColor*)right width:(CGFloat)width next:(TTStyle*)next {
+  TTFourBorderStyle* style = [[[self alloc] initWithNext:next] autorelease];
+  style.right = right;
+  style.width = width;
+  return style;
+}
+
++ (TTFourBorderStyle*)styleWithBottom:(UIColor*)bottom width:(CGFloat)width next:(TTStyle*)next {
+  TTFourBorderStyle* style = [[[self alloc] initWithNext:next] autorelease];
+  style.bottom = bottom;
+  style.width = width;
+  return style;
+}
+
++ (TTFourBorderStyle*)styleWithLeft:(UIColor*)left width:(CGFloat)width next:(TTStyle*)next {
+  TTFourBorderStyle* style = [[[self alloc] initWithNext:next] autorelease];
+  style.left = left;
+  style.width = width;
+  return style;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // NSObject
 
@@ -1193,10 +1436,10 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_top release];
-  [_right release];
-  [_bottom release];
-  [_left release];
+  TT_RELEASE_SAFELY(_top);
+  TT_RELEASE_SAFELY(_right);
+  TT_RELEASE_SAFELY(_bottom);
+  TT_RELEASE_SAFELY(_left);
   [super dealloc];
 }
 
@@ -1292,8 +1535,8 @@ static const NSInteger kDefaultLightSource = 125;
 }
 
 - (void)dealloc {
-  [_highlight release];
-  [_shadow release];
+  TT_RELEASE_SAFELY(_highlight);
+  TT_RELEASE_SAFELY(_shadow);
   [super dealloc];
 }
 
@@ -1363,6 +1606,89 @@ static const NSInteger kDefaultLightSource = 125;
   CGContextRestoreGState(ctx);
 
   context.frame = rect;
+  return [self.next draw:context];
+}
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+@implementation TTLinearGradientBorderStyle
+
+@synthesize color1 = _color1, color2 = _color2, location1 = _location1, location2 = _location2,
+            width = _width;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// NSObject
+
++ (TTLinearGradientBorderStyle*)styleWithColor1:(UIColor*)color1 color2:(UIColor*)color2
+                                width:(CGFloat)width next:(TTStyle*)next {
+  TTLinearGradientBorderStyle* style = [[[TTLinearGradientBorderStyle alloc] initWithNext:next]
+                                       autorelease];
+  style.color1 = color1;
+  style.color2 = color2;
+  style.width = width;
+  return style;  
+}
+
++ (TTLinearGradientBorderStyle*)styleWithColor1:(UIColor*)color1 location1:(CGFloat)location1
+                                color2:(UIColor*)color2 location2:(CGFloat)location2
+                                width:(CGFloat)width next:(TTStyle*)next {
+  TTLinearGradientBorderStyle* style = [[[TTLinearGradientBorderStyle alloc] initWithNext:next]
+                                       autorelease];
+  style.color1 = color1;
+  style.color2 = color2;
+  style.width = width;
+  style.location1 = location1;
+  style.location2 = location2;
+  return style;  
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// NSObject
+
+- (id)initWithNext:(TTStyle*)next {  
+  if (self = [super initWithNext:next]) {
+    _color1 = nil;
+    _color2 = nil;
+    _location1 = 0;
+    _location2 = 1;
+    _width = 1;
+  }
+  return self;
+}
+
+- (void)dealloc {
+  TT_RELEASE_SAFELY(_color1);
+  TT_RELEASE_SAFELY(_color2);
+  [super dealloc];
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// TTStyle
+
+- (void)draw:(TTStyleContext*)context {
+  CGContextRef ctx = UIGraphicsGetCurrentContext();
+  CGRect rect = context.frame;
+  
+  CGContextSaveGState(ctx);
+
+  CGRect strokeRect = CGRectInset(context.frame, _width/2, _width/2);
+  [context.shape addToPath:strokeRect];
+  CGContextSetLineWidth(ctx, _width);
+  CGContextReplacePathWithStrokedPath(ctx);
+  CGContextClip(ctx);
+  
+  UIColor* colors[] = {_color1, _color2};
+  CGFloat locations[] = {_location1, _location2};
+  CGGradientRef gradient = [self newGradientWithColors:colors locations:locations count:2];
+  CGContextDrawLinearGradient(ctx, gradient, CGPointMake(rect.origin.x, rect.origin.y),
+    CGPointMake(rect.origin.x, rect.origin.y+rect.size.height), kCGGradientDrawsAfterEndLocation);
+  CGGradientRelease(gradient);
+
+  CGContextRestoreGState(ctx);
+
+  context.frame = CGRectInset(context.frame, _width, _width);
   return [self.next draw:context];
 }
 

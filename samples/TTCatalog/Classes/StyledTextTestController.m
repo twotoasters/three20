@@ -71,6 +71,9 @@
 - (void)loadView {
   [super loadView];
   
+//  NSString* kText = @"\
+//<span>Thisisareallylongwordthatshouldwrapisareallylongwordthatshouldwrapisareallylongwordthatshould\
+//wrapisareallylongwordthatshouldwrapisareallylongwordthatshouldwrap</span>";
   NSString* kText = @"\
 This is a test of styled labels.  Styled labels support \
 <b>bold text</b>, <i>italic text</i>, <span class=\"blueText\">colored text</span>, \
@@ -80,6 +83,8 @@ This is a test of styled labels.  Styled labels support \
 actually touch. URLs are automatically converted into links, like this: http://www.foo.com\
 <div>You can enclose blocks within an HTML div.</div>\
 Both line break characters\n\nand HTML line breaks<br/>are respected.";
+//  NSString* kText = @"\
+//<span class=\"largeText\">font sizes</span>a";
 //  NSString* kText = @"<span class=\"largeText\">bah</span><span class=\"inlineBox\">hyper links</span>";
 //  NSString* kText = @"blah blah blah black sheep blah <span class=\"inlineBox\">\
 //<img src=\"bundle://smiley.png\"/>hyperlinks</span> blah fun";
@@ -100,9 +105,12 @@ Both line break characters\n\nand HTML line breaks<br/>are respected.";
 //  NSString* kText = @"\
 //<a>Bob Bobbers</a> <span class=\"smallText\">at 4:30 pm</span><br>Testing";
 
+  // XXXjoe This illustrates the need to calculate a line's descender height as well @1079
+  // NSString* kText = @"<span class=\"largeText\">bah</span> <span class=\"smallText\">humbug</span>";
+
   TTStyledTextLabel* label1 = [[[TTStyledTextLabel alloc] initWithFrame:self.view.bounds] autorelease];
   label1.font = [UIFont systemFontOfSize:17];
-  label1.text = [TTStyledText textFromXHTML:kText lineBreaks:YES urls:YES];
+  label1.text = [TTStyledText textFromXHTML:kText lineBreaks:YES URLs:YES];
   label1.contentInset = UIEdgeInsetsMake(10, 10, 10, 10);
   //label1.backgroundColor = [UIColor grayColor];
   [label1 sizeToFit];

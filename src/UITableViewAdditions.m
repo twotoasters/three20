@@ -1,7 +1,29 @@
-#import "Three20/TTGlobal.h"
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+#import "Three20/UITableViewAdditions.h"
+
+#import "Three20/UIViewAdditions.h"
+#import "Three20/UIWindowAdditions.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Additions.
+ */
 @implementation UITableView (TTCategory)
 
 - (UIView*)indexView {
@@ -13,6 +35,14 @@
     }
   }
   return nil;
+}
+
+- (CGFloat)tableCellMargin {
+  if (self.style == UITableViewStyleGrouped) {
+    return 10;
+  } else {
+    return 0;
+  }
 }
 
 - (void)scrollToTop:(BOOL)animated {
@@ -28,6 +58,38 @@
       NSIndexPath* indexPath = [NSIndexPath indexPathWithIndexes:ii length:2];
       [self scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom
         animated:animated];
+    }
+  }
+}
+
+- (void)scrollToFirstRow:(BOOL)animated {
+  if ([self numberOfSections] > 0 && [self numberOfRowsInSection:0] > 0) {
+    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    [self scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop
+          animated:NO];
+  }
+}
+
+- (void)scrollToLastRow:(BOOL)animated {
+  if ([self numberOfSections] > 0) {
+    NSInteger section = [self numberOfSections]-1;
+    NSInteger rowCount = [self numberOfRowsInSection:section];
+    if (rowCount > 0) {
+      NSIndexPath* indexPath = [NSIndexPath indexPathForRow:rowCount-1 inSection:section];
+      [self scrollToRowAtIndexPath:indexPath
+                      atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+    }
+  }
+}
+
+- (void)scrollFirstResponderIntoView {
+  UIView* responder = [self.window findFirstResponder];
+  UITableViewCell* cell = (UITableViewCell*)[responder ancestorOrSelfWithClass:[UITableViewCell class]];
+  if (cell) {
+    NSIndexPath* indexPath = [self indexPathForCell:cell];
+    if (indexPath) {
+      [self scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle
+            animated:YES];
     }
   }
 }

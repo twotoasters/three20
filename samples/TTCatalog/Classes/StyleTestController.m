@@ -26,6 +26,12 @@
     [TTSolidFillStyle styleWithColor:[UIColor whiteColor] next:
     [TTSolidBorderStyle styleWithColor:black width:1 next:nil]]],
 
+    // Gradient border
+    [TTShapeStyle styleWithShape:[TTRoundedRectangleShape shapeWithRadius:10] next:
+    [TTSolidFillStyle styleWithColor:[UIColor whiteColor] next:
+    [TTLinearGradientBorderStyle styleWithColor1:RGBCOLOR(0, 0, 0)
+                                 color2:RGBCOLOR(216, 221, 231) width:2 next:nil]]],
+
     // Rounded left arrow
     [TTShapeStyle styleWithShape:[TTRoundedLeftArrowShape shapeWithRadius:5] next:
     [TTSolidFillStyle styleWithColor:[UIColor whiteColor] next:
@@ -117,7 +123,7 @@
   
   CGFloat padding = 10;
   CGFloat viewWidth = scrollView.width/2 - padding*2;
-  CGFloat viewHeight = TOOLBAR_HEIGHT;
+  CGFloat viewHeight = TT_ROW_HEIGHT;
   
   CGFloat x = padding;
   CGFloat y = padding;
@@ -136,7 +142,7 @@
     x += frame.size.width + padding;
   }
   
-  scrollView.contentSize = CGSizeMake(scrollView.width, y);
+  scrollView.contentSize = CGSizeMake(scrollView.width, y + viewHeight + padding);
 }
 
 @end

@@ -1,9 +1,28 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTStyledText.h"
+
+#import "Three20/TTGlobalCore.h"
+
 #import "Three20/TTStyledNode.h"
 #import "Three20/TTStyledFrame.h"
 #import "Three20/TTStyledLayout.h"
 #import "Three20/TTStyledTextParser.h"
-#import "Three20/TTURLRequest.h"
+
 #import "Three20/TTURLResponse.h"
 #import "Three20/TTURLCache.h"
 
@@ -18,13 +37,13 @@
 // class public
 
 + (TTStyledText*)textFromXHTML:(NSString*)source {
-  return [self textFromXHTML:source lineBreaks:NO urls:YES];
+  return [self textFromXHTML:source lineBreaks:NO URLs:YES];
 }
 
-+ (TTStyledText*)textFromXHTML:(NSString*)source lineBreaks:(BOOL)lineBreaks urls:(BOOL)urls {
++ (TTStyledText*)textFromXHTML:(NSString*)source lineBreaks:(BOOL)lineBreaks URLs:(BOOL)URLs {
   TTStyledTextParser* parser = [[[TTStyledTextParser alloc] init] autorelease];
   parser.parseLineBreaks = lineBreaks;
-  parser.parseURLs = urls;
+  parser.parseURLs = URLs;
   [parser parseXHTML:source];
   if (parser.rootNode) {
     return [[[TTStyledText alloc] initWithNode:parser.rootNode] autorelease];
@@ -55,8 +74,7 @@
 - (void)stopLoadingImages {
   if (_imageRequests) {
     NSMutableArray* requests = [_imageRequests retain];
-    [_imageRequests release];
-    _imageRequests = nil;
+    TT_RELEASE_SAFELY(_imageRequests);
 
     if (!_invalidImages) {
       _invalidImages = [[NSMutableArray alloc] init];
@@ -76,13 +94,13 @@
   if (_delegate && _invalidImages) {
     BOOL loadedSome = NO;
     for (TTStyledImageNode* imageNode in _invalidImages) {
-      if (imageNode.url) {
-        UIImage* image = [[TTURLCache sharedCache] imageForURL:imageNode.url];
+      if (imageNode.URL) {
+        UIImage* image = [[TTURLCache sharedCache] imageForURL:imageNode.URL];
         if (image) {
           imageNode.image = image;
           loadedSome = YES;
         } else {
-          TTURLRequest* request = [TTURLRequest requestWithURL:imageNode.url delegate:self];
+          TTURLRequest* request = [TTURLRequest requestWithURL:imageNode.URL delegate:self];
           request.userInfo = imageNode;
           request.response = [[[TTURLImageResponse alloc] init] autorelease];
           [request send];
@@ -90,8 +108,7 @@
       }
     }
 
-    [_invalidImages release];
-    _invalidImages = nil;
+    TT_RELEASE_SAFELY(_invalidImages);
     
     if (loadedSome) {
       [_delegate styledTextNeedsDisplay:self];
@@ -151,16 +168,16 @@
 
 - (void)dealloc {
   [self stopLoadingImages];
-  [_rootNode release];
-  [_rootFrame release];
-  [_font release];
-  [_invalidImages release];
-  [_imageRequests release];
+  TT_RELEASE_SAFELY(_rootNode);
+  TT_RELEASE_SAFELY(_rootFrame);
+  TT_RELEASE_SAFELY(_font);
+  TT_RELEASE_SAFELY(_invalidImages);
+  TT_RELEASE_SAFELY(_imageRequests);
   [super dealloc];
 }
 
 - (NSString*)description {
-  return [self.rootFrame description];
+  return [self.rootNode outerText];
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -253,8 +270,7 @@
 }
 
 - (void)setNeedsLayout {
-  [_rootFrame release];
-  _rootFrame = nil;
+  TT_RELEASE_SAFELY(_rootFrame);
   _height = 0;
 }
 

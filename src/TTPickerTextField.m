@@ -1,5 +1,27 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTPickerTextField.h"
-#import "TTPickerViewCell.h"
+
+#import "Three20/TTGlobalCore.h"
+#import "Three20/TTGlobalUI.h"
+#import "Three20/TTGlobalUINavigator.h"
+
+#import "Three20/TTTableViewDataSource.h"
+#import "Three20/TTPickerViewCell.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,16 +61,16 @@ static CGFloat kMinCursorWidth = 50;
 }
 
 - (void)dealloc {
-  [_cellViews release];
+  TT_RELEASE_SAFELY(_cellViews);
   [super dealloc];
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (CGFloat)layoutCells {
-  CGSize fontSize = [@"M" sizeWithFont:self.font];
-  CGFloat lineIncrement = fontSize.height + kCellPaddingY*2 + kSpacingY;
-  CGFloat marginY = floor(fontSize.height/kPaddingRatio);
+  CGFloat fontHeight = self.font.ttLineHeight;
+  CGFloat lineIncrement = fontHeight + kCellPaddingY*2 + kSpacingY;
+  CGFloat marginY = floor(fontHeight/kPaddingRatio);
   CGFloat marginLeft = self.leftView
     ? kPaddingX + self.leftView.width + kPaddingX/2
     : kPaddingX;
@@ -82,7 +104,7 @@ static CGFloat kMinCursorWidth = 50;
     }
   }
   
-  return _cursorOrigin.y + fontSize.height + marginY;
+  return _cursorOrigin.y + fontHeight + marginY;
 }
 
 - (void)updateHeight {
@@ -102,33 +124,32 @@ static CGFloat kMinCursorWidth = 50;
 }
 
 - (CGFloat)marginY {
-  CGSize fontSize = [@"M" sizeWithFont:self.font];
-  return floor(fontSize.height/kPaddingRatio);
+  return floor(self.font.ttLineHeight/kPaddingRatio);
 }
 
 - (CGFloat)topOfLine:(int)lineNumber {
   if (lineNumber == 0) {
     return 0;
   } else {
-    CGFloat lineHeight = [@"M" sizeWithFont:self.font].height;
+    CGFloat ttLineHeight = self.font.ttLineHeight;
     CGFloat lineSpacing = kCellPaddingY*2 + kSpacingY;
-    CGFloat marginY = floor(lineHeight/kPaddingRatio);
-    CGFloat lineTop = marginY + lineHeight*lineNumber + lineSpacing*lineNumber;
+    CGFloat marginY = floor(ttLineHeight/kPaddingRatio);
+    CGFloat lineTop = marginY + ttLineHeight*lineNumber + lineSpacing*lineNumber;
     return lineTop - lineSpacing;
   }
 }
 
 - (CGFloat)centerOfLine:(int)lineNumber {
   CGFloat lineTop = [self topOfLine:lineNumber];
-  CGFloat lineHeight = [@"M" sizeWithFont:self.font].height + kCellPaddingY*2 + kSpacingY;
-  return lineTop + floor(lineHeight/2);
+  CGFloat ttLineHeight = self.font.ttLineHeight + kCellPaddingY*2 + kSpacingY;
+  return lineTop + floor(ttLineHeight/2);
 }
 
 - (CGFloat)heightWithLines:(int)lines {
-  CGFloat lineHeight = [@"M" sizeWithFont:self.font].height;
+  CGFloat ttLineHeight = self.font.ttLineHeight;
   CGFloat lineSpacing = kCellPaddingY*2 + kSpacingY;
-  CGFloat marginY = floor(lineHeight/kPaddingRatio);
-  return marginY + lineHeight*lines + lineSpacing*(lines ? lines-1 : 0) + marginY;
+  CGFloat marginY = floor(ttLineHeight/kPaddingRatio);
+  return marginY + ttLineHeight*lines + lineSpacing*(lines ? lines-1 : 0) + marginY;
 }
 
 - (void)selectLastCell {
@@ -166,7 +187,9 @@ static CGFloat kMinCursorWidth = 50;
   return CGSizeMake(size.width, height);
 }
 
-- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+  [super touchesBegan:touches withEvent:event];
+
   if (_dataSource) {
     UITouch* touch = [touches anyObject];
     if (touch.view == self) {
@@ -174,10 +197,10 @@ static CGFloat kMinCursorWidth = 50;
     } else {
       if ([touch.view isKindOfClass:[TTPickerViewCell class]]) {
         self.selectedCell = (TTPickerViewCell*)touch.view;
+        [self becomeFirstResponder];
       }
     }
   }
-  [super touchesEnded:touches withEvent:event];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,7 +215,8 @@ static CGFloat kMinCursorWidth = 50;
 
 - (CGRect)textRectForBounds:(CGRect)bounds {
   if (_dataSource && [self.text isEqualToString:kSelected]) {
-    return CGRectMake(0, 0, 0, 0);
+    // Hide the cursor while a cell is selected
+    return CGRectMake(-10, 0, 0, 0);
   } else {
     CGRect frame = CGRectOffset(bounds, _cursorOrigin.x, _cursorOrigin.y);
     frame.size.width -= (_cursorOrigin.x + kPaddingX + (self.rightView ? kClearButtonSize : 0));
@@ -232,7 +256,7 @@ static CGFloat kMinCursorWidth = 50;
 
 - (BOOL)hasText {
   return self.text.length && ![self.text isEqualToString:kEmpty]
-    && ![self.text isEqualToString:kSelected];
+         && ![self.text isEqualToString:kSelected];
 }
 
 - (void)showSearchResults:(BOOL)show {
@@ -246,10 +270,10 @@ static CGFloat kMinCursorWidth = 50;
 
 - (CGRect)rectForSearchResults:(BOOL)withKeyboard {
   UIView* superview = self.superviewForSearchResults;
-  CGFloat y = superview.screenY;
+  CGFloat y = superview.ttScreenY;
   CGFloat visibleHeight = [self heightWithLines:1];
-  CGFloat keyboardHeight = withKeyboard ? KEYBOARD_HEIGHT : 0;
-  CGFloat tableHeight = self.window.height - (y + visibleHeight + keyboardHeight);
+  CGFloat keyboardHeight = withKeyboard ? TTKeyboardHeight() : 0;
+  CGFloat tableHeight = TTScreenBounds().size.height - (y + visibleHeight + keyboardHeight);
 
   return CGRectMake(0, self.bottom-1, superview.frame.size.width, tableHeight+1);
 }
@@ -262,6 +286,10 @@ static CGFloat kMinCursorWidth = 50;
     [self removeSelectedCell];
     [super shouldUpdate:emptyText];
     return NO;
+  } else if (!emptyText && !self.hasText && self.selectedCell) {
+    [self removeSelectedCell];
+    [super shouldUpdate:emptyText];
+    return YES;
   } else {
     return [super shouldUpdate:emptyText];
   }
@@ -297,7 +325,7 @@ static CGFloat kMinCursorWidth = 50;
 }
 
 - (void)addCellWithObject:(id)object {
-  TTPickerViewCell* cell = [[[TTPickerViewCell alloc] initWithFrame:CGRectZero] autorelease];
+  TTPickerViewCell* cell = [[[TTPickerViewCell alloc] init] autorelease];
 
   NSString* label = [self labelForObject:object];
   
@@ -375,7 +403,7 @@ static CGFloat kMinCursorWidth = 50;
 
 - (void)scrollToVisibleLine:(BOOL)animated {
   if (self.editing) {
-    UIScrollView* scrollView = (UIScrollView*)[self firstParentOfClass:[UIScrollView class]];
+    UIScrollView* scrollView = (UIScrollView*)[self ancestorOrSelfWithClass:[UIScrollView class]];
     if (scrollView) {
       [scrollView setContentOffset:CGPointMake(0, self.top) animated:animated];
     }
@@ -383,7 +411,7 @@ static CGFloat kMinCursorWidth = 50;
 }
 
 - (void)scrollToEditingLine:(BOOL)animated {
-  UIScrollView* scrollView = (UIScrollView*)[self firstParentOfClass:[UIScrollView class]];
+  UIScrollView* scrollView = (UIScrollView*)[self ancestorOrSelfWithClass:[UIScrollView class]];
   if (scrollView) {
     CGFloat offset = _lineCount == 1 ? 0 : [self topOfLine:_lineCount-1];
     [scrollView setContentOffset:CGPointMake(0, self.top+offset) animated:animated];

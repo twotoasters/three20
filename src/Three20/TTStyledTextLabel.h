@@ -1,3 +1,19 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTStyledText.h"
 
 @class TTStyledElement, TTStyledBoxFrame, TTStyle;
@@ -15,12 +31,18 @@
   BOOL _highlighted;
   TTStyledElement* _highlightedNode;
   TTStyledBoxFrame* _highlightedFrame;
+  NSMutableArray* _accessibilityElements;
 }
 
 /**
  * The styled text displayed by the label.
  */
 @property(nonatomic, retain) TTStyledText* text;
+
+/**
+ * A shortcut for setting the text property to an HTML string.
+ */
+@property(nonatomic, copy) NSString* html;
 
 /**
  * The font of the text.

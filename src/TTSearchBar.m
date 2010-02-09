@@ -1,6 +1,25 @@
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 #import "Three20/TTSearchBar.h"
+
+#import "Three20/TTGlobalCoreLocale.h"
+#import "Three20/TTGlobalUI.h"
+
 #import "Three20/TTSearchTextField.h"
-#import "Three20/TTView.h"
 #import "Three20/TTDefaultStyleSheet.h"
 #import "Three20/TTButton.h"
 
@@ -11,6 +30,7 @@ static const CGFloat kMarginY = 7;
 static const CGFloat kPaddingX = 10;
 static const CGFloat kPaddingY = 10;
 static const CGFloat kSpacingX = 4;
+static const CGFloat kButtonSpacing = 12;
 static const CGFloat kButtonHeight = 30;
 
 static const CGFloat kIndexViewMargin = 4;
@@ -26,7 +46,7 @@ static const CGFloat kIndexViewMargin = 4;
 // private
 
 - (CGFloat)indexViewWidth {
-  UITableView* tableView = (UITableView*)[self firstParentOfClass:[UITableView class]];
+  UITableView* tableView = (UITableView*)[self ancestorOrSelfWithClass:[UITableView class]];
   if (tableView) {
     UIView* indexView = tableView.indexView;
     if (indexView) {
@@ -37,7 +57,7 @@ static const CGFloat kIndexViewMargin = 4;
 }
 
 - (void)showIndexView:(BOOL)show {
-  UITableView* tableView = (UITableView*)[self firstParentOfClass:[UITableView class]];
+  UITableView* tableView = (UITableView*)[self ancestorOrSelfWithClass:[UITableView class]];
   if (tableView) {
     UIView* indexView = tableView.indexView;
     if (indexView) {
@@ -67,7 +87,7 @@ static const CGFloat kIndexViewMargin = 4;
 }
 
 - (void)scrollToTop {
-  UIScrollView* scrollView = (UIScrollView*)[self firstParentOfClass:[UIScrollView class]];
+  UIScrollView* scrollView = (UIScrollView*)[self ancestorOrSelfWithClass:[UIScrollView class]];
   if (scrollView) {
     CGPoint offset = scrollView.contentOffset;
     CGPoint myOffset = [self offsetFromView:scrollView];
@@ -91,11 +111,11 @@ static const CGFloat kIndexViewMargin = 4;
 
 - (id)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
-    _boxView = [[TTView alloc] initWithFrame:CGRectZero];
+    _boxView = [[TTView alloc] init];
     _boxView.backgroundColor = [UIColor clearColor];
     [self addSubview:_boxView];
         
-    _searchField = [[TTSearchTextField alloc] initWithFrame:CGRectZero];
+    _searchField = [[TTSearchTextField alloc] init];
     _searchField.placeholder = TTLocalizedString(@"Search", @"");
     _searchField.autocapitalizationType = UITextAutocapitalizationTypeNone;
     [_searchField addTarget:self action:@selector(textFieldDidBeginEditing)
@@ -115,11 +135,11 @@ static const CGFloat kIndexViewMargin = 4;
 }
 
 - (void)dealloc {
-  [_searchField release];
-  [_boxView release];
-  [_textFieldStyle release];
-  [_tintColor release];
-  [_cancelButton release];
+  TT_RELEASE_SAFELY(_searchField);
+  TT_RELEASE_SAFELY(_boxView);
+  TT_RELEASE_SAFELY(_textFieldStyle);
+  TT_RELEASE_SAFELY(_tintColor);
+  TT_RELEASE_SAFELY(_cancelButton);
   [super dealloc];
 }
 
@@ -144,28 +164,27 @@ static const CGFloat kIndexViewMargin = 4;
   CGFloat buttonWidth = 0;
   if (_showsCancelButton) {
     [_cancelButton sizeToFit];
-    buttonWidth = _cancelButton.width + kSpacingX;
+    buttonWidth = _cancelButton.width + kButtonSpacing;
   }
 
-  CGFloat boxHeight = self.height - kMarginY*2;
-  _boxView.frame = CGRectMake(kMarginX, floor(self.height/2 - boxHeight/2)+1,
+  CGFloat boxHeight = self.font.ttLineHeight + 8;
+  _boxView.frame = CGRectMake(kMarginX, floor(self.height/2 - boxHeight/2),
                               self.width - (kMarginX*2 + indexViewWidth + buttonWidth), boxHeight);
     
-  _searchField.frame = CGRectMake(kMarginX+kPaddingX+leftPadding, 1,
+  _searchField.frame = CGRectMake(kMarginX+kPaddingX+leftPadding, 0,
     self.width - (kMarginX*2+kPaddingX+leftPadding+buttonWidth+indexViewWidth), self.height);
   
   if (_showsCancelButton) {
-    _cancelButton.frame = CGRectMake(_boxView.right + kSpacingX,
-                                     floor(self.height/2 - kButtonHeight/2)+1,
+    _cancelButton.frame = CGRectMake(_boxView.right + kButtonSpacing,
+                                     floor(self.height/2 - kButtonHeight/2),
                                      _cancelButton.width, kButtonHeight);
   }
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
-  CGSize fontSize = [@"M" sizeWithFont:self.font];
-  CGFloat height = fontSize.height+kPaddingY*2;
-  if (height < TOOLBAR_HEIGHT) {
-    height = TOOLBAR_HEIGHT;
+  CGFloat height = self.font.ttLineHeight+kPaddingY*2;
+  if (height < TT_ROW_HEIGHT) {
+    height = TT_ROW_HEIGHT;
   }
   return CGSizeMake(size.width, height);
 }
@@ -214,15 +233,14 @@ static const CGFloat kIndexViewMargin = 4;
     _showsCancelButton = showsCancelButton;
     
     if (_showsCancelButton) {
-      _cancelButton = [[TTButton buttonWithStyle:@"blackToolbarRoundButton:"
+      _cancelButton = [[TTButton buttonWithStyle:@"blackToolbarButton:"
                                  title:TTLocalizedString(@"Cancel", @"")] retain];
       [_cancelButton addTarget:_searchField action:@selector(resignFirstResponder)
                      forControlEvents:UIControlEventTouchUpInside];
       [self addSubview:_cancelButton];
     } else {
       [_cancelButton removeFromSuperview];
-      [_cancelButton release];
-      _cancelButton = nil;
+      TT_RELEASE_SAFELY(_cancelButton);
     }
   }
 }

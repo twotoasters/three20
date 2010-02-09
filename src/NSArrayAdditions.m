@@ -1,5 +1,24 @@
-#import "Three20/TTGlobal.h"
+//
+// Copyright 2009 Facebook
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 
+#import "Three20/NSArrayAdditions.h"
+
+/**
+ * Additions.
+ */
 @implementation NSArray (TTCategory)
 
 - (void)perform:(SEL)selector {
@@ -55,6 +74,34 @@
       [invo invoke];
     }
   }
+}
+
+- (id)objectWithValue:(id)value forKey:(id)key {
+  for (id object in self) {
+    id propertyValue = [object valueForKey:key];
+    if ([propertyValue isEqual:value]) {
+      return object;
+    }
+  }
+  return nil;
+}
+
+- (id)objectWithClass:(Class)cls {
+  for (id object in self) {
+    if ([object isKindOfClass:cls]) {
+      return object;
+    }
+  }
+  return nil;
+}
+
+- (BOOL)containsObject:(id)object withSelector:(SEL)selector {
+  for (id item in self) {
+    if ([[item performSelector:selector withObject:object] boolValue]) {
+      return YES;
+    }
+  }
+  return NO;
 }
 
 @end
