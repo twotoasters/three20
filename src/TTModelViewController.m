@@ -328,7 +328,8 @@
 
 - (void)reload {
   _flags.isViewInvalid = YES;
-  [self.model load:TTURLRequestCachePolicyNetwork more:NO];
+  id<TTModel>model = self.model;
+  [model load:TTURLRequestCachePolicyNetwork more:NO];
 }
 
 - (void)reloadIfNeeded {

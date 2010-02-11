@@ -202,25 +202,3 @@
 - (UIViewController*)viewController;
 
 @end
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// This code for synthesizing touch events is derived from:
-// http://cocoawithlove.com/2008/10/synthesizing-touch-event-on-iphone.html
-
-@interface GSEventFake : NSObject {
-  @public
-  int ignored1[5];
-  float x;
-  float y;
-  int ignored2[24];
-}
-@end
-
-@interface UIEventFake : NSObject {
-  @public
-  CFTypeRef _event;
-  NSTimeInterval _timestamp;
-  NSMutableSet* _touches;
-  CFMutableDictionaryRef _keyedTouches;
-}
-@end
