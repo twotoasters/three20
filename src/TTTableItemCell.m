@@ -1310,9 +1310,9 @@ static const CGFloat kDefaultMessageImageHeight = 34;
       minX += contentWidth - _control.width;
     }
     
-//    // XXXjoe For some reason I need to re-add the control as a subview or else
-//    // the re-use of the cell will cause the control to fail to paint itself on occasion
-//    [self.contentView addSubview:_control];
+    // XXXjoe For some reason I need to re-add the control as a subview or else
+    // the re-use of the cell will cause the control to fail to paint itself on occasion
+    [self.contentView addSubview:_control];
     _control.frame = CGRectMake(minX, floor(self.contentView.height/2 - _control.height/2),
                                 contentWidth, _control.height);
   }
