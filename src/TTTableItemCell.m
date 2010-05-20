@@ -1077,14 +1077,13 @@ static const CGFloat kDefaultMessageImageHeight = 34;
     item.text.font = TTSTYLEVAR(font);
   }
   
-  CGFloat padding = [tableView tableCellMargin]*2 + item.padding.left + item.padding.right;
+  CGFloat padding = [tableView tableCellMargin]*2 + item.margin.left + item.margin.right + item.padding.left + item.padding.right;
   if (item.URL) {
     padding += kDisclosureIndicatorWidth;
   }
   
   item.text.width = tableView.width - padding;
-  
-  return item.text.height + item.padding.top + item.padding.bottom;
+  return item.text.height + (item.margin.top + item.margin.bottom) + (item.padding.top + item.padding.bottom);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1111,7 +1110,12 @@ static const CGFloat kDefaultMessageImageHeight = 34;
   [super layoutSubviews];
   
   TTTableStyledTextItem* item = self.object;
-  _label.frame = CGRectOffset(self.contentView.bounds, item.margin.left, item.margin.top);
+//	self.contentView.frame = CGRectInset(self.contentView.frame, 0, -(item.margin.top + item.margin.bottom));
+  self.contentView.frame = CGRectMake(self.contentView.bounds.origin.x + item.margin.left + 10,
+							self.contentView.bounds.origin.y + item.margin.top,
+							self.contentView.bounds.size.width - (item.margin.left + item.margin.right + 10),
+							self.contentView.bounds.size.height - (item.margin.top + item.margin.bottom));
+	_label.frame = self.contentView.bounds;
 }
 
 - (void)didMoveToSuperview {
@@ -1147,7 +1151,7 @@ static const CGFloat kDefaultMessageImageHeight = 34;
 // TTTableViewCell class public
 
 + (CGFloat)tableView:(UITableView*)tableView rowHeightForObject:(id)object {
-  TTStyledText* text = object;
+  TTStyledText* text = [object text];
   if (!text.font) {
     text.font = TTSTYLEVAR(font);
   }
@@ -1198,7 +1202,7 @@ static const CGFloat kDefaultMessageImageHeight = 34;
 
 - (void)setObject:(id)object {
   if (self.object != object) {
-    _label.text = object;
+    _label.text = [object text];
   }  
 }
 
