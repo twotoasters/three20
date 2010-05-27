@@ -89,7 +89,8 @@ static const CGFloat kDefaultMessageImageHeight = 34;
       if (item.accessoryURL) {
         self.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
       } else if (navigationMode == TTNavigationModeCreate ||
-                 navigationMode == TTNavigationModeShare) {
+                 navigationMode == TTNavigationModeShare ||
+				 navigationMode == TTNavigationModeExternal) {
         self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
       } else {
         self.accessoryType = UITableViewCellAccessoryNone;
@@ -1079,7 +1080,7 @@ static const CGFloat kDefaultMessageImageHeight = 34;
   
   CGFloat padding = [tableView tableCellMargin]*2 + item.margin.left + item.margin.right + item.padding.left + item.padding.right;
   if (item.URL) {
-    padding += kDisclosureIndicatorWidth;
+    padding += kDisclosureIndicatorWidth * 2;
   }
   
   item.text.width = tableView.width - padding;
@@ -1115,7 +1116,11 @@ static const CGFloat kDefaultMessageImageHeight = 34;
 							self.contentView.bounds.origin.y + item.margin.top,
 							self.contentView.bounds.size.width - (item.margin.left + item.margin.right + 10),
 							self.contentView.bounds.size.height - (item.margin.top + item.margin.bottom));
-	_label.frame = self.contentView.bounds;
+	CGFloat disclosureWidth = (([_item URL] == nil) ? 0 :  kDisclosureIndicatorWidth);
+	_label.frame = CGRectMake(self.contentView.bounds.origin.x,
+							  self.contentView.bounds.origin.y,
+							  self.contentView.bounds.size.width - disclosureWidth,
+							  self.contentView.bounds.size.height);
 }
 
 - (void)didMoveToSuperview {

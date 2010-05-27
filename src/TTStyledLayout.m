@@ -283,6 +283,11 @@
   // Figure out which font to use for the node
   UIFont* font = nil;
   TTTextStyle* textStyle = nil;
+  if (style && ![style isKindOfClass:[TTStyle class]]) {
+	NSLog([NSString stringWithFormat:@"******Error********* style (%@) is not a TTStyle.", style]);
+    style = nil;
+    
+  }
   if (style) {
     textStyle = [style firstStyleOfClass:[TTTextStyle class]];
     if (textStyle) {
