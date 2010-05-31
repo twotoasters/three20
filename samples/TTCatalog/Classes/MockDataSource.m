@@ -320,17 +320,17 @@
 
 - (void)fakeSearch:(NSString*)text {
   self.names = [NSMutableArray array];
-  
+
   if (text.length) {
     text = [text lowercaseString];
     for (NSString* name in _allNames) {
       if ([[name lowercaseString] rangeOfString:text].location == 0) {
         [_names addObject:name];
       }
-    }    
+    }
   }
 
-  [_delegates perform:@selector(modelDidFinishLoad:) withObject:self];
+  [_delegates makeObjectsPerformSelector:@selector(modelDidFinishLoad:) withObject:self];
 }
 
 - (void)fakeSearchReady:(NSTimer*)timer {
@@ -401,7 +401,7 @@
 - (void)cancel {
   if (_fakeSearchTimer) {
     TT_INVALIDATE_TIMER(_fakeSearchTimer);
-    [_delegates perform:@selector(modelDidCancelLoad:) withObject:self];
+    [_delegates makeObjectsPerformSelector:@selector(modelDidCancelLoad:) withObject:self];
   }
 }
 
@@ -415,20 +415,20 @@
 
 - (void)search:(NSString*)text {
   [self cancel];
-  
+
   if (text.length) {
     if (_fakeSearchDuration) {
       TT_INVALIDATE_TIMER(_fakeSearchTimer);
       _fakeSearchTimer = [NSTimer scheduledTimerWithTimeInterval:_fakeSearchDuration target:self
                                 selector:@selector(fakeSearchReady:) userInfo:text repeats:NO];
-      [_delegates perform:@selector(modelDidStartLoad:) withObject:self];
+      [_delegates makeObjectsPerformSelector:@selector(modelDidStartLoad:) withObject:self];
     } else {
       [self fakeSearch:text];
-      [_delegates perform:@selector(modelDidFinishLoad:) withObject:self];
+      [_delegates makeObjectsPerformSelector:@selector(modelDidFinishLoad:) withObject:self];
     }
   } else {
     TT_RELEASE_SAFELY(_names);
-    [_delegates perform:@selector(modelDidChange:) withObject:self];
+    [_delegates makeObjectsPerformSelector:@selector(modelDidChange:) withObject:self];
   }
 }
 
@@ -470,7 +470,7 @@
 - (void)tableViewDidLoadModel:(UITableView*)tableView {
   self.items = [NSMutableArray array];
   self.sections = [NSMutableArray array];
-  
+
   NSMutableDictionary* groups = [NSMutableDictionary dictionary];
   for (NSString* name in _addressBook.names) {
     NSString* letter = [NSString stringWithFormat:@"%c", [name characterAtIndex:0]];
@@ -479,7 +479,7 @@
       section = [NSMutableArray array];
       [groups setObject:section forKey:letter];
     }
-    
+
     TTTableItem* item = [TTTableTextItem itemWithText:name URL:nil];
     [section addObject:item];
   }
@@ -526,7 +526,7 @@
 
 - (void)tableViewDidLoadModel:(UITableView*)tableView {
   self.items = [NSMutableArray array];
-    
+
   for (NSString* name in _addressBook.names) {
     TTTableItem* item = [TTTableTextItem itemWithText:name URL:@"http://google.com"];
     [_items addObject:item];
