@@ -673,11 +673,6 @@ static const CGFloat kBannerViewHeight = 22;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)setTableOverlayView:(UIView*)tableOverlayView {
-	[self setTableOverlayView:tableOverlayView animated:YES];
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)setTableOverlayView:(UIView*)tableOverlayView animated:(BOOL)animated {
   if (tableOverlayView != _tableOverlayView) {
     if (_tableOverlayView) {
@@ -701,6 +696,10 @@ static const CGFloat kBannerViewHeight = 22;
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)setTableOverlayView:(UIView*)tableOverlayView {
+	[self setTableOverlayView:tableOverlayView animated:YES];
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)setDataSource:(id<TTTableViewDataSource>)dataSource {

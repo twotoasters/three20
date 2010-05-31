@@ -393,7 +393,7 @@
   UIFont* font = nil;
   TTTextStyle* textStyle = nil;
   if (style && ![style isKindOfClass:[TTStyle class]]) {
-	NSLog([NSString stringWithFormat:@"******Error********* style (%@) is not a TTStyle.", style]);
+	NSLog(@"******Error********* style (%@) is not a TTStyle.", style);
     style = nil;
     
   }
