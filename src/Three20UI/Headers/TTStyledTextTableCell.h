@@ -21,6 +21,7 @@
 
 @interface TTStyledTextTableCell : TTTableViewCell {
   TTStyledTextLabel* _label;
+  id _object;
 }
 
 @property (nonatomic, readonly) TTStyledTextLabel* label;

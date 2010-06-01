@@ -20,6 +20,7 @@
 #import "Three20UI/TTStyledTextLabel.h"
 #import "Three20UI/UIViewAdditions.h"
 #import "Three20UI/UITableViewAdditions.h"
+#import "Three20UI/TTTableStyledTextItem.h"
 
 // Style
 #import "Three20Style/TTGlobalStyle.h"
@@ -44,7 +45,7 @@
     _label = [[TTStyledTextLabel alloc] init];
     _label.contentMode = UIViewContentModeLeft;
     [self.contentView addSubview:_label];
-
+    _object = nil;
     self.selectionStyle = UITableViewCellSelectionStyleNone;
   }
 
@@ -55,6 +56,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)dealloc {
   TT_RELEASE_SAFELY(_label);
+  TT_RELEASE_SAFELY(_object);
   [super dealloc];
 }
 
@@ -105,15 +107,12 @@
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-- (id)object {
-  return _label.text;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)setObject:(id)object {
-  if (self.object != object) {
-    _label.text = object;
+- (void)setObject:(id)newObject {
+  if (self.object != newObject) {
+    [newObject retain];
+    [_object release];
+	_object = newObject;
+    _label.text = [(TTTableStyledTextItem*)_object text];
   }
 }
 
