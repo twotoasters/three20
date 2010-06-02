@@ -96,7 +96,10 @@ static const CGFloat kDisclosureIndicatorWidth = 23;
   [super layoutSubviews];
 
   TTTableStyledTextItem* item = self.object;
-  _label.frame = CGRectOffset(self.contentView.bounds, item.margin.left, item.margin.top);
+  _label.frame = CGRectMake(self.contentView.bounds.origin.x + item.margin.left,
+							  self.contentView.bounds.origin.y + item.margin.top,
+							  self.contentView.bounds.size.width - item.margin.left - item.margin.right,
+							  self.contentView.bounds.size.height - item.margin.top - item.margin.bottom);
 }
 
 
