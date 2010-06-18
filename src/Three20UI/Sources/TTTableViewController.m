@@ -62,6 +62,7 @@
 @synthesize tableViewStyle      = _tableViewStyle;
 @synthesize variableHeightRows  = _variableHeightRows;
 @synthesize showTableShadows    = _showTableShadows;
+@synthesize clearsSelectionOnViewWillAppear = _clearsSelectionOnViewWillAppear;
 @synthesize dataSource          = _dataSource;
 
 
@@ -71,6 +72,7 @@
   if (self) {
     _lastInterfaceOrientation = self.interfaceOrientation;
     _tableViewStyle = UITableViewStylePlain;
+    _clearsSelectionOnViewWillAppear = YES;
   }
 
   return self;
@@ -269,7 +271,9 @@
     tableView.showShadows = _showTableShadows;
   }
 
-  [_tableView deselectRowAtIndexPath:[_tableView indexPathForSelectedRow] animated:animated];
+  if (_clearsSelectionOnViewWillAppear) {
+    [_tableView deselectRowAtIndexPath:[_tableView indexPathForSelectedRow] animated:animated];
+  }
 }
 
 
