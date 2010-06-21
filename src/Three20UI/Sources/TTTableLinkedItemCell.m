@@ -72,7 +72,8 @@
         self.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
 
       } else if (navigationMode == TTNavigationModeCreate ||
-                 navigationMode == TTNavigationModeShare) {
+                 navigationMode == TTNavigationModeShare ||
+				 navigationMode == TTNavigationModeExternal) {
         self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
       } else {
