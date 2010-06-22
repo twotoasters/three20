@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3F27832711D046A900F9A165 /* TTStrikethroughTextStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = 3F27827211D03F3200F9A165 /* TTStrikethroughTextStyle.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3F7BD58111D04927000D9A09 /* TTStrikethroughTextStyle.m in Sources */ = {isa = PBXBuildFile; fileRef = 3F27827311D03F3200F9A165 /* TTStrikethroughTextStyle.m */; };
 		6E6454901184D3BC00F08CB1 /* Three20Style+Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E64548F1184D3BC00F08CB1 /* Three20Style+Additions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6E6464041187F5CB00F08CB1 /* TTStyledButtonNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6464021187F5CB00F08CB1 /* TTStyledButtonNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6E6464051187F5CB00F08CB1 /* TTStyledLinkNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6464031187F5CB00F08CB1 /* TTStyledLinkNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -205,6 +207,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3F27827211D03F3200F9A165 /* TTStrikethroughTextStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TTStrikethroughTextStyle.h; path = Headers/TTStrikethroughTextStyle.h; sourceTree = "<group>"; };
+		3F27827311D03F3200F9A165 /* TTStrikethroughTextStyle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TTStrikethroughTextStyle.m; path = Sources/TTStrikethroughTextStyle.m; sourceTree = "<group>"; };
 		6E64543D1184BE1B00F08CB1 /* Project.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Project.xcconfig; path = Configurations/Project.xcconfig; sourceTree = "<group>"; };
 		6E64548F1184D3BC00F08CB1 /* Three20Style+Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Three20Style+Additions.h"; path = "Headers/Three20Style+Additions.h"; sourceTree = "<group>"; };
 		6E6464021187F5CB00F08CB1 /* TTStyledButtonNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TTStyledButtonNode.h; path = Headers/TTStyledButtonNode.h; sourceTree = "<group>"; };
@@ -535,6 +539,8 @@
 				6EE737A11184A39B00A35176 /* TTSolidFillStyle.m */,
 				6EE737401184A38F00A35176 /* TTTextStyle.h */,
 				6EE737BF1184A39B00A35176 /* TTTextStyle.m */,
+				3F27827211D03F3200F9A165 /* TTStrikethroughTextStyle.h */,
+				3F27827311D03F3200F9A165 /* TTStrikethroughTextStyle.m */,
 			);
 			name = Styles;
 			sourceTree = "<group>";
@@ -736,6 +742,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3F27832711D046A900F9A165 /* TTStrikethroughTextStyle.h in Headers */,
 				6EE737441184A38F00A35176 /* TTBevelBorderStyle.h in Headers */,
 				6EE737451184A38F00A35176 /* TTBlendStyle.h in Headers */,
 				6EE737461184A38F00A35176 /* TTBoxStyle.h in Headers */,
@@ -1011,6 +1018,7 @@
 				6EE738001184A39B00A35176 /* UIImageAdditions.m in Sources */,
 				6E64640C1187F5EC00F08CB1 /* TTStyledButtonNode.m in Sources */,
 				6E64640D1187F5EC00F08CB1 /* TTStyledLinkNode.m in Sources */,
+				3F7BD58111D04927000D9A09 /* TTStrikethroughTextStyle.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

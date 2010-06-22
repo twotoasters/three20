@@ -48,6 +48,7 @@
 #import "Three20Style/TTInsetStyle.h"
 #import "Three20Style/TTBoxStyle.h"
 #import "Three20Style/TTTextStyle.h"
+#import "Three20Style/TTStrikethroughTextStyle.h"
 #import "Three20Style/TTImageStyle.h"
 #import "Three20Style/TTMaskStyle.h"
 #import "Three20Style/TTBlendStyle.h"
