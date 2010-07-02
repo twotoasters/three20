@@ -14,6 +14,9 @@
 // limitations under the License.
 //
 
-#import "Three20/Three20.h"
-
-// Hello, world.
+int main(int argc, char *argv[]) {
+  NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+  int retVal = UIApplicationMain(argc, argv, nil, @"AppDelegate");
+  [pool release];
+  return retVal;
+}

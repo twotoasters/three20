@@ -14,6 +14,5 @@
 // limitations under the License.
 //
 
-#include "common/Configurations/Project.xcconfig"
-
-REPO_ROOT_PATH = $(SRCROOT)/..
+#include "../../common/Configurations/Project.xcconfig"
+#include "RelPath.xcconfig"

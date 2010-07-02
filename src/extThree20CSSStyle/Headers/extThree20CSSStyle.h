@@ -14,10 +14,9 @@
 // limitations under the License.
 //
 
-#include "common/Configurations/UnitTests.xcconfig"
-#include "common/Configurations/Libraries.xcconfig"
+// CSS Parser
+#import "extThree20CSSStyle/TTCSSParser.h"
 
-REPO_ROOT_PATH        = $(SRCROOT)/..
-
-PRODUCT_NAME          = Three20UnitTests
-BUILD_BUNDLE_VERSION  = 1.0
+// CSS Stylesheet
+#import "extThree20CSSStyle/TTCSSStyleSheet.h"
+#import "extThree20CSSStyle/TTDefaultCSSStyleSheet.h"
