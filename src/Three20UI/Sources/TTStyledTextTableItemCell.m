@@ -81,7 +81,7 @@ static const CGFloat kDisclosureIndicatorWidth = 23;
 
   item.text.width = tableView.width - padding;
 
-  return item.text.height + item.padding.top + item.padding.bottom;
+  return item.text.height + item.padding.top + item.padding.bottom + item.margin.top + item.margin.bottom;
 }
 
 
