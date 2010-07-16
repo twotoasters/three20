@@ -79,11 +79,12 @@ static const CGFloat kDisclosureIndicatorWidth = 23;
   if (item.URL) {
     padding += kDisclosureIndicatorWidth;
   }
+	
+  CGFloat margin = item.margin.left + item.margin.right;
 
-  item.text.width = tableView.width - padding;
+  item.text.width = tableView.width - padding - margin;
 
-  return item.text.height + item.padding.top +
-    item.padding.bottom + item.margin.top + item.margin.bottom;
+  return item.text.height + item.padding.top + item.padding.bottom + item.margin.top + item.margin.bottom;
 }
 
 
@@ -98,10 +99,7 @@ static const CGFloat kDisclosureIndicatorWidth = 23;
   [super layoutSubviews];
 
   TTTableStyledTextItem* item = self.object;
-  _label.frame = CGRectMake(self.contentView.bounds.origin.x + item.margin.left,
-							  self.contentView.bounds.origin.y + item.margin.top,
-							  self.contentView.bounds.size.width - item.margin.left - item.margin.right,
-							  self.contentView.bounds.size.height - item.margin.top - item.margin.bottom);
+  _label.frame = UIEdgeInsetsInsetRect(self.contentView.bounds, item.margin);
 }
 
 
