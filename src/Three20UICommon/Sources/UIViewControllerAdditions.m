@@ -293,11 +293,8 @@ static const NSTimeInterval kGarbageCollectionInterval = 20;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)showBars:(BOOL)show animated:(BOOL)animated {
-#if __IPHONE_3_2 && __IPHONE_3_2 <= __IPHONE_OS_VERSION_MAX_ALLOWED
-  [[UIApplication sharedApplication] setStatusBarHidden:!show withAnimation:animated];
-#else
+	// JBE use deprecated method here because conditionally compiling it out is not working on 4.0 sdk with a 3.0 deployment target.
   [[UIApplication sharedApplication] setStatusBarHidden:!show animated:animated];
-#endif
 
   if (animated) {
     [UIView beginAnimations:nil context:NULL];
