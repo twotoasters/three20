@@ -101,6 +101,12 @@ static const CGFloat kHPadding  = 10;
   CGFloat maxHeight = _imageView.height + _titleView.height + _subtitleView.height
                       + kVPadding1 + kVPadding2;
   BOOL canShowImage = _imageView.image && self.height > maxHeight;
+  if (!canShowImage) {
+    _imageView.frame = CGRectMake(0, 0, _imageView.bounds.size.width / 2, _imageView.bounds.size.height /2);
+    maxHeight = _imageView.height + _titleView.height + _subtitleView.height + kVPadding1 + kVPadding2;
+    canShowImage = _imageView.image && self.height > maxHeight;
+    _imageView.contentMode = UIViewContentModeScaleAspectFit;
+  }
 
   CGFloat totalHeight = 0;
 
