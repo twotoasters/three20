@@ -146,7 +146,7 @@ static const CGFloat kControlPadding = 8;
 
   if ([TTTableControlCell shouldSizeControlToFit:_control]) {
     _control.frame = CGRectInset(self.contentView.bounds, 2, kTableCellSpacing / 2);
-
+	  
   } else {
     CGFloat minX = kControlPadding;
     CGFloat contentWidth = self.contentView.width - kControlPadding;
@@ -161,6 +161,17 @@ static const CGFloat kControlPadding = 8;
 
     if (!_control.height) {
       [_control sizeToFit];
+    }
+	
+    // sizeToFit on an empty text control will return a zero height. Temporarily set
+    // the text to a single space and size it to avoid this (sbw - 9/2/2010)
+    if (!_control.height && [_control respondsToSelector:@selector(text)]) {
+      NSString* text = [_control performSelector:@selector(text)];
+      if (0 == [text length]) {
+        [_control performSelector:@selector(setText:) withObject:@" "];
+        [_control sizeToFit];
+        [_control performSelector:@selector(setText:) withObject:text];
+      }
     }
 
     if ([TTTableControlCell shouldConsiderControlIntrinsicSize:_control]) {
