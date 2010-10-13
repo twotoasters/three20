@@ -831,7 +831,7 @@ static const CGFloat kBannerViewHeight = 22;
 
     for (UIView* view in _menuCell.contentView.subviews) {
       if (view != _menuView) {
-        view.left += _menuCell.contentView.width;
+        view.right -= _menuCell.contentView.width;
       }
     }
 
