@@ -95,15 +95,6 @@ static const CGFloat kMarginY = 6;
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-- (id)init {
-  if (self = [self initWithNavigatorURL:nil query:nil]) {
-  }
-
-  return self;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)dealloc {
   TT_RELEASE_SAFELY(_result);
   TT_RELEASE_SAFELY(_defaultText);
@@ -137,39 +128,33 @@ static const CGFloat kMarginY = 6;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)showKeyboard {
-  UIApplication* app = [UIApplication sharedApplication];
-  _originalStatusBarStyle = app.statusBarStyle;
-  _originalStatusBarHidden = app.statusBarHidden;
-  if (!_originalStatusBarHidden) {
-#if __IPHONE_3_2 && __IPHONE_3_2 <= __IPHONE_OS_VERSION_MAX_ALLOWED
-    if (TTOSVersion() >= 3.2) {
-      [app setStatusBarHidden:NO withAnimation:YES];
-    }
-    else
+	UIApplication* app = [UIApplication sharedApplication];
+	_originalStatusBarStyle = app.statusBarStyle;
+	_originalStatusBarHidden = app.statusBarHidden;
+	if (!_originalStatusBarHidden) {
+#ifdef __IPHONE_3_2
+		if ([app respondsToSelector:@selector(setStatusBarHidden:withAnimation:)])
+			[app setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
+		else
 #endif
-    {
-      [app setStatusBarHidden:NO animated:YES];
-    }
-    [app setStatusBarStyle:UIStatusBarStyleBlackTranslucent animated:YES];
-  }
-  [_textView becomeFirstResponder];
+			[app setStatusBarHidden:NO animated:YES];
+		[app setStatusBarStyle:UIStatusBarStyleBlackTranslucent animated:YES];
+	}
+	[_textView becomeFirstResponder];
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)hideKeyboard {
-  UIApplication* app = [UIApplication sharedApplication];
-#if __IPHONE_3_2 && __IPHONE_3_2 <= __IPHONE_OS_VERSION_MAX_ALLOWED
-  if (TTOSVersion() >= 3.2) {
-    [app setStatusBarHidden:_originalStatusBarHidden withAnimation:YES];
-  }
-  else
+	UIApplication* app = [UIApplication sharedApplication];
+#ifdef __IPHONE_3_2
+	if ([app respondsToSelector:@selector(setStatusBarHidden:withAnimation:)])
+		[app setStatusBarHidden:_originalStatusBarHidden withAnimation:UIStatusBarAnimationSlide];
+	else
 #endif
-  {
-    [app setStatusBarHidden:_originalStatusBarHidden animated:YES];
-  }
-  [app setStatusBarStyle:_originalStatusBarStyle animated:NO];
-  [_textView resignFirstResponder];
+		[app setStatusBarHidden:_originalStatusBarHidden animated:YES];
+	[app setStatusBarStyle:_originalStatusBarStyle animated:NO];
+	[_textView resignFirstResponder];
 }
 
 

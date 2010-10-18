@@ -293,15 +293,12 @@ static const NSTimeInterval kGarbageCollectionInterval = 20;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)showBars:(BOOL)show animated:(BOOL)animated {
-#if __IPHONE_3_2 && __IPHONE_3_2 <= __IPHONE_OS_VERSION_MAX_ALLOWED
-  if (TTOSVersion() >= 3.2) {
-    [[UIApplication sharedApplication] setStatusBarHidden:!show withAnimation:animated];
-  }
-  else
+#ifdef __IPHONE_3_2
+	if ([[UIApplication sharedApplication] respondsToSelector:@selector(setStatusBarHidden:withAnimation:)])
+		[[UIApplication sharedApplication] setStatusBarHidden:!show withAnimation:animated ? UIStatusBarAnimationFade : UIStatusBarAnimationNone];
+	else
 #endif
-  {
-    [[UIApplication sharedApplication] setStatusBarHidden:!show animated:animated];
-  }
+		[[UIApplication sharedApplication] setStatusBarHidden:!show animated:animated];
 
   if (animated) {
     [UIView beginAnimations:nil context:NULL];
@@ -349,7 +346,7 @@ static const NSTimeInterval kGarbageCollectionInterval = 20;
       NSInteger retainCount = [controller retainCount] - 1;
 
       TTDCONDITIONLOG(TTDFLAG_CONTROLLERGARBAGECOLLECTION,
-                      @"Retain count for %X is %d", controller, retainCount);
+                      @"Retain count for %X is %d", (unsigned int)controller, retainCount);
 
       if (retainCount == 1) {
         // If this fails, you've somehow added a controller that doesn't use
@@ -373,7 +370,7 @@ static const NSTimeInterval kGarbageCollectionInterval = 20;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)unsetCommonProperties {
   TTDCONDITIONLOG(TTDFLAG_CONTROLLERGARBAGECOLLECTION,
-                  @"Unsetting this controller's properties: %X", self);
+                  @"Unsetting this controller's properties: %X", (unsigned int)self);
 
   self.superController = nil;
   self.popupViewController = nil;
