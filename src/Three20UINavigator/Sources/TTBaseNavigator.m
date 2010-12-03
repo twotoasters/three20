@@ -378,7 +378,7 @@ UIKIT_EXTERN NSString *const UIApplicationWillEnterForegroundNotification __attr
 
   // We may need to modify the urlPath, so let's create a local copy.
   NSString* urlPath = action.urlPath;
-
+	
   NSURL* theURL = [NSURL URLWithString:urlPath];
   if ([_URLMap isAppURL:theURL]) {
     [[UIApplication sharedApplication] openURL:theURL];

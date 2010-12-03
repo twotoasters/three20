@@ -46,6 +46,7 @@
 @property (nonatomic)           UIReturnKeyType returnKeyType;
 @property (nonatomic)           CGFloat         rowHeight;
 @property (nonatomic, readonly) BOOL            editing;
+@property (nonatomic, retain) TTSearchTextField* textField;
 
 @property (nonatomic)           BOOL searchesAutomatically;
 @property (nonatomic)           BOOL showsCancelButton;

@@ -55,7 +55,7 @@ static const CGFloat kIndexViewMargin = 4;
 @synthesize textFieldStyle    = _textFieldStyle;
 @synthesize showsCancelButton = _showsCancelButton;
 @synthesize showsSearchIcon   = _showsSearchIcon;
-
+@synthesize textField		  = _searchField;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithFrame:(CGRect)frame {
