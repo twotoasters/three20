@@ -26,6 +26,7 @@
 
 // Core
 #import "Three20Core/TTCorePreprocessorMacros.h"
+#import "Three20Core/NSArrayAdditions.h"
 
 static const NSInteger kOffscreenPages = 1;
 static const CGFloat kDefaultPageSpacing = 40.0;
@@ -1131,6 +1132,16 @@ static const NSTimeInterval kOvershoot = 2;
     UIEdgeInsets pageEdges = [self resistPageEdges:newEdges];
 
     if (![self edgesAreZoomed:pageEdges] || self.canZoom) {
+        // We are going to look for a scroll view below us. If it has a page to the left or right, we scroll it and not this one.
+        TTScrollView* scrollView = [self.centerPage.subviews objectWithClass:[TTScrollView class]];
+        
+        if (pageEdges.left < 0 && scrollView.centerPageIndex + 1 < scrollView.numberOfPages) {
+            pageEdges = _pageEdges;
+        }
+        if (pageEdges.left > 0 && scrollView.centerPageIndex  > 0) {
+            pageEdges = _pageEdges;
+        }
+        // end shenanagins.
       _pageEdges = pageEdges;
       [self updateZooming:pageEdges];
       [self setNeedsLayout];
