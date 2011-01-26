@@ -1136,10 +1136,12 @@ static const NSTimeInterval kOvershoot = 2;
         TTScrollView* scrollView = [self.centerPage.subviews objectWithClass:[TTScrollView class]];
         
         if (pageEdges.left < 0 && scrollView.centerPageIndex + 1 < scrollView.numberOfPages) {
-            pageEdges = _pageEdges;
+            pageEdges.right = pageEdges.right - pageEdges.left;
+            pageEdges.left = 0;
         }
         if (pageEdges.left > 0 && scrollView.centerPageIndex  > 0) {
-            pageEdges = _pageEdges;
+            pageEdges.right = pageEdges.right - pageEdges.left;
+            pageEdges.left = 0;
         }
         // end shenanagins.
       _pageEdges = pageEdges;
