@@ -1135,6 +1135,11 @@ static const NSTimeInterval kOvershoot = 2;
         // We are going to look for a scroll view below us. If it has a page to the left or right, we scroll it and not this one.
         TTScrollView* scrollView = [self.centerPage.subviews objectWithClass:[TTScrollView class]];
         
+		if (scrollView.zoomed) {
+			pageEdges.right = pageEdges.right - pageEdges.left;
+            pageEdges.left = 0;
+		}
+		
         if (pageEdges.left < 0 && scrollView.centerPageIndex + 1 < scrollView.numberOfPages) {
             pageEdges.right = pageEdges.right - pageEdges.left;
             pageEdges.left = 0;
