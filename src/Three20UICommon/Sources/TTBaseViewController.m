@@ -44,7 +44,14 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+<<<<<<< HEAD
   if ((self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])) {
+||||||| merged common ancestors
+  if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+=======
+	self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+  if (self) {
+>>>>>>> [Three20] Style Guide Refactoring Part 1 - Initializers.
     _navigationBarStyle = UIBarStyleDefault;
     _statusBarStyle = [[UIApplication sharedApplication] statusBarStyle];
   }
@@ -55,7 +62,14 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)init {
+<<<<<<< HEAD
   if ((self = [self initWithNibName:nil bundle:nil])) {
+||||||| merged common ancestors
+  if (self = [self initWithNibName:nil bundle:nil]) {
+=======
+	self = [self initWithNibName:nil bundle:nil];
+  if (self) {
+>>>>>>> [Three20] Style Guide Refactoring Part 1 - Initializers.
   }
 
   return self;

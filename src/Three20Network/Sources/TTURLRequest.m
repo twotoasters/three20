@@ -83,7 +83,8 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithURL:(NSString*)URL delegate:(id /*<TTURLRequestDelegate>*/)delegate {
-  if ((self = [self init])) {
+	self = [self init];
+  if (self) {
     _urlPath = [URL retain];
     if (nil != delegate) {
       [_delegates addObject:delegate];
@@ -95,7 +96,8 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)init {
-  if ((self = [super init])) {
+	self = [super init];
+  if (self) {
     _delegates = TTCreateNonRetainingArray();
     _cachePolicy = TTURLRequestCachePolicyDefault;
     _cacheExpirationAge = TT_DEFAULT_CACHE_EXPIRATION_AGE;

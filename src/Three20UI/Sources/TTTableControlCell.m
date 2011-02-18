@@ -43,7 +43,14 @@ static const CGFloat kControlPadding = 8;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString*)identifier {
+<<<<<<< HEAD
   if ((self = [super initWithStyle:style reuseIdentifier:identifier])) {
+||||||| merged common ancestors
+  if (self = [super initWithStyle:style reuseIdentifier:identifier]) {
+=======
+	self = [super initWithStyle:style reuseIdentifier:identifier];
+  if (self) {
+>>>>>>> [Three20] Style Guide Refactoring Part 1 - Initializers.
     self.selectionStyle = UITableViewCellSelectionStyleNone;
   }
 

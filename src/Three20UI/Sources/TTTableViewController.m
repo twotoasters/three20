@@ -67,7 +67,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-  if ((self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])) {
+	self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+  if (self) {
     _lastInterfaceOrientation = self.interfaceOrientation;
     _tableViewStyle = UITableViewStylePlain;
   }
@@ -78,7 +79,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithStyle:(UITableViewStyle)style {
-  if ((self = [self initWithNibName:nil bundle:nil])) {
+	self = [self initWithNibName:nil bundle:nil];
+  if (self) {
     _tableViewStyle = style;
   }
 
