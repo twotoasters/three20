@@ -43,6 +43,7 @@
     self.textLabel.font = TTSTYLEVAR(tableFont);
     self.textLabel.textColor = TTSTYLEVAR(textColor);
     self.textLabel.highlightedTextColor = TTSTYLEVAR(highlightedTextColor);
+	self.textLabel.backgroundColor = TTSTYLEVAR(backgroundTextColor);
     self.textLabel.textAlignment = UITextAlignmentLeft;
     self.textLabel.lineBreakMode = UILineBreakModeTailTruncation;
     self.textLabel.adjustsFontSizeToFitWidth = YES;
@@ -50,6 +51,7 @@
     self.detailTextLabel.font = TTSTYLEVAR(font);
     self.detailTextLabel.textColor = TTSTYLEVAR(tableSubTextColor);
     self.detailTextLabel.highlightedTextColor = TTSTYLEVAR(highlightedTextColor);
+	self.detailTextLabel.backgroundColor = TTSTYLEVAR(backgroundTextColor);
     self.detailTextLabel.textAlignment = UITextAlignmentLeft;
     self.detailTextLabel.contentMode = UIViewContentModeTop;
     self.detailTextLabel.lineBreakMode = UILineBreakModeTailTruncation;
