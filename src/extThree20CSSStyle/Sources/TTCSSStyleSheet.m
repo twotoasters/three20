@@ -440,6 +440,10 @@ NSString* kKeyTextShadowColor   = @"color";
     // The given selector actually exists in the CSS.
     if (nil != ruleSet) {
       NSArray* values = [ruleSet objectForKey:kCssPropertyTextShadow];
+
+      // Safety check
+      if (nil == values) return nil;
+
       // Anything more or less is unsupported, and therefore this property is ignored
       // according to the W3C guidelines.
       TTDASSERT([values count] >= 4);
@@ -477,7 +481,7 @@ NSString* kKeyTextShadowColor   = @"color";
 
   NSDictionary* textShadow = [self textShadowWithCssSelector: selector
                                                     forState: state];
-  return [textShadow objectForKey:kKeyTextShadowColor];
+  return nil != textShadow ? [textShadow objectForKey:kKeyTextShadowColor] : nil;
 }
 
 
@@ -487,8 +491,10 @@ NSString* kKeyTextShadowColor   = @"color";
 
   NSDictionary* textShadow = [self textShadowWithCssSelector: selector
                                                     forState: state];
-  return CGSizeMake([[textShadow objectForKey:kKeyTextShadowHOffset] floatValue],
-                    [[textShadow objectForKey:kKeyTextShadowVOffset] floatValue]);
+  return nil != textShadow ?
+  CGSizeMake([[textShadow objectForKey:kKeyTextShadowHOffset] floatValue],
+             [[textShadow objectForKey:kKeyTextShadowVOffset] floatValue]) :
+  CGSizeZero;
 }
 
 
@@ -498,7 +504,7 @@ NSString* kKeyTextShadowColor   = @"color";
 
   NSDictionary* textShadow = [self textShadowWithCssSelector: selector
                                                     forState: state];
-  return [[textShadow objectForKey:kKeyTextShadowBlur] floatValue];
+  return nil != textShadow ? [[textShadow objectForKey:kKeyTextShadowBlur] floatValue] : 0;
 }
 
 
