@@ -51,6 +51,7 @@
 
     self.style = TTSTYLE(tabStrip);
     self.tabStyle = @"tabRound:";
+    self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
   }
 
   return self;
