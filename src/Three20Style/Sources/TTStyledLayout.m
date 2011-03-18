@@ -1,5 +1,5 @@
 //
-// Copyright 2009-2010 Facebook
+// Copyright 2009-2011 Facebook
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -117,6 +117,7 @@
     if ([node isKindOfClass:[TTStyledElement class]]) {
       TTStyledElement* element = (TTStyledElement*)node;
       lastNode = [self findLastNode:element.firstChild];
+
     } else {
       lastNode = node;
     }
@@ -209,12 +210,15 @@
 - (void)addFrame:(TTStyledFrame*)frame {
   if (!_rootFrame) {
     _rootFrame = [frame retain];
+
   } else if (_topFrame) {
     if (!_topFrame.firstChildFrame) {
       _topFrame.firstChildFrame = frame;
+
     } else {
       _lastFrame.nextFrame = frame;
     }
+
   } else {
     _lastFrame.nextFrame = frame;
   }
@@ -407,8 +411,10 @@
     if ([elt isKindOfClass:[TTStyledLinkNode class]]
         || [elt isKindOfClass:[TTStyledBoldNode class]]) {
       font = self.boldFont;
+
     } else if ([elt isKindOfClass:[TTStyledItalicNode class]]) {
       font = self.italicFont;
+
     } else {
       font = self.font;
     }
@@ -450,6 +456,7 @@
         }
         _minX += contentWidth;
         _width -= contentWidth;
+
       } else if (padding.position == TTPositionFloatRight) {
         frame.x += _width - (_floatRightWidth + contentWidth);
         _floatRightWidth += contentWidth;
@@ -463,6 +470,7 @@
       blockFrame.width = layout.width + padding.padding.left + padding.padding.right;
       blockFrame.height = frameHeight + padding.padding.top + padding.padding.bottom;
     }
+
   } else {
     CGFloat minX = _minX, width = _width, floatLeftWidth = _floatLeftWidth,
             floatRightWidth = _floatRightWidth, floatHeight = _floatHeight;
@@ -486,6 +494,7 @@
       if (style) {
         blockFrame = [self addBlockFrame:style element:elt width:_width height:_height];
       }
+
     } else {
       if (padding) {
         _x += padding.margin.left;
@@ -532,6 +541,7 @@
 
         _height += padding.margin.bottom;
       }
+
     } else if (!isBlock && style) {
       if (padding) {
         _x += padding.padding.right + padding.margin.right;
@@ -590,6 +600,7 @@
       // The image will be placed on the next line, so create a new frame for
       // the current line and mark it with a line break
       [self breakLine];
+
     } else {
       _width = contentWidth;
     }
@@ -603,10 +614,12 @@
     [self addContentFrame:frame width:imageWidth height:imageHeight];
     [self expandLineWidth:contentWidth];
     [self inflateLineHeight:contentHeight];
+
   } else if (padding.position == TTPositionAbsolute) {
     [self addAbsoluteFrame:frame width:imageWidth height:imageHeight];
     frame.x += padding.margin.left;
     frame.y += padding.margin.top;
+
   } else if (padding.position == TTPositionFloatLeft) {
     [self addContentFrame:frame width:imageWidth height:imageHeight];
 
@@ -617,6 +630,7 @@
     }
     _minX += contentWidth;
     _width -= contentWidth;
+
   } else if (padding.position == TTPositionFloatRight) {
     [self addContentFrame:frame width:imageWidth height:imageHeight];
 
@@ -657,6 +671,7 @@
   NSInteger stringIndex = 0;
   NSInteger lineStartIndex = 0;
   CGFloat frameWidth = 0;
+  NSInteger frameStart = 0;
 
   while (stringIndex < length) {
     // Search for the next whitespace character
@@ -684,6 +699,9 @@
           NSRange lineRange = NSMakeRange(lineStartIndex, stringIndex - lineStartIndex);
           if (lineRange.length) {
             NSString* line = [text substringWithRange:lineRange];
+            frameWidth = [[text substringWithRange:NSMakeRange(frameStart,
+                                                               stringIndex - frameStart)]
+                          sizeWithFont:_font].width;
             [self addFrameForText:line element:element node:textNode width:frameWidth
                   height:_lineHeight ? _lineHeight : [_font ttLineHeight]];
           }
@@ -693,10 +711,9 @@
           }
 
           lineStartIndex = lineRange.location + lineRange.length;
-          frameWidth = 0;
+          frameStart = stringIndex;
         }
 
-        frameWidth += letterSize.width;
         [self expandLineWidth:letterSize.width];
         [self inflateLineHeight:wordSize.height];
         ++stringIndex;
@@ -705,12 +722,15 @@
       NSRange lineRange = NSMakeRange(lineStartIndex, stringIndex - lineStartIndex);
       if (lineRange.length) {
         NSString* line = [text substringWithRange:lineRange];
+        frameWidth = [[text substringWithRange:NSMakeRange(frameStart, stringIndex - frameStart)]
+                      sizeWithFont:_font].width;
         [self addFrameForText:line element:element node:textNode width:frameWidth
               height:_lineHeight ? _lineHeight : [_font ttLineHeight]];
 
         lineStartIndex = lineRange.location + lineRange.length;
-        frameWidth = 0;
+        frameStart = stringIndex;
       }
+
     } else {
       if (_lineWidth + wordSize.width > _width) {
         // The word will be placed on the next line, so create a new frame for
@@ -718,6 +738,8 @@
         NSRange lineRange = NSMakeRange(lineStartIndex, stringIndex - lineStartIndex);
         if (lineRange.length) {
           NSString* line = [text substringWithRange:lineRange];
+          frameWidth = [[text substringWithRange:NSMakeRange(frameStart, stringIndex - frameStart)]
+                        sizeWithFont:_font].width;
           [self addFrameForText:line element:element node:textNode width:frameWidth
                 height:_lineHeight ? _lineHeight : [_font ttLineHeight]];
         }
@@ -726,7 +748,7 @@
           [self breakLine];
         }
         lineStartIndex = lineRange.location + lineRange.length;
-        frameWidth = 0;
+        frameStart = stringIndex;
       }
 
       if (!_lineWidth && textNode == _lastNode) {
@@ -744,7 +766,6 @@
         break;
       }
 
-      frameWidth += wordSize.width;
       [self expandLineWidth:wordSize.width];
       [self inflateLineHeight:wordSize.height];
 
@@ -754,6 +775,8 @@
         NSRange lineRange = NSMakeRange(lineStartIndex, (wordRange.location + wordRange.length)
                                                         - lineStartIndex);
         NSString* line = !_lineWidth ? word : [text substringWithRange:lineRange];
+        frameWidth = [[text substringWithRange:NSMakeRange(frameStart, stringIndex - frameStart)]
+                      sizeWithFont:_font].width;
         [self addFrameForText:line element:element node:textNode width:frameWidth
               height:[_font ttLineHeight]];
         frameWidth = 0;
@@ -795,9 +818,11 @@
     if ([node isKindOfClass:[TTStyledImageNode class]]) {
       TTStyledImageNode* imageNode = (TTStyledImageNode*)node;
       [self layoutImage:imageNode container:element];
+
     } else if ([node isKindOfClass:[TTStyledElement class]]) {
       TTStyledElement* elt = (TTStyledElement*)node;
       [self layoutElement:elt];
+
     } else if ([node isKindOfClass:[TTStyledTextNode class]]) {
       TTStyledTextNode* textNode = (TTStyledTextNode*)node;
       [self layoutText:textNode container:element];
