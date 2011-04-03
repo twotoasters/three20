@@ -43,14 +43,8 @@ static const CGFloat kControlPadding = 8;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString*)identifier {
-<<<<<<< HEAD
-  if ((self = [super initWithStyle:style reuseIdentifier:identifier])) {
-||||||| merged common ancestors
-  if (self = [super initWithStyle:style reuseIdentifier:identifier]) {
-=======
 	self = [super initWithStyle:style reuseIdentifier:identifier];
   if (self) {
->>>>>>> [Three20] Style Guide Refactoring Part 1 - Initializers.
     self.selectionStyle = UITableViewCellSelectionStyleNone;
   }
 
@@ -210,9 +204,8 @@ static const CGFloat kControlPadding = 8;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)setObject:(id)object {
   if (object != _control && object != _item) {
-    if (_control.superview == self.contentView) {
+    if (_control.superview == self.contentView)
       [_control removeFromSuperview];
-    }
     TT_RELEASE_SAFELY(_control);
     TT_RELEASE_SAFELY(_item);
 
