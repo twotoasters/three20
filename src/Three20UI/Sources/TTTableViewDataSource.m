@@ -125,10 +125,17 @@
 
   UITableViewCell* cell =
     (UITableViewCell*)[tableView dequeueReusableCellWithIdentifier:identifier];
-  if (cell == nil) {
-    cell = [[[cellClass alloc] initWithStyle:UITableViewCellStyleDefault
-                               reuseIdentifier:identifier] autorelease];
-  }
+    if (cell == nil) {
+        @try {
+            // Try to create cell from Nib
+            cell = [self createNewCellWithClass:cellClass identifier:identifier];
+        }
+        @catch (NSException *exception) {
+            // Couldn't create cell from Nib, load normally
+            cell = [[[cellClass alloc] initWithStyle:UITableViewCellStyleDefault
+                                     reuseIdentifier:identifier] autorelease];
+        }
+    }
   [identifier release];
 
   if ([cell isKindOfClass:[TTTableViewCell class]]) {
@@ -140,6 +147,13 @@
   return cell;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (UITableViewCell*)createNewCellWithClass:(Class)klaz
+                                identifier:(NSString*)identifier
+{
+  NSArray *tab = [[NSBundle mainBundle] loadNibNamed:identifier owner:nil options:nil];
+  return [tab objectAtIndex:0];
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (NSArray*)sectionIndexTitlesForTableView:(UITableView*)tableView {

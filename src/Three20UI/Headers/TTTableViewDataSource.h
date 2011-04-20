@@ -39,6 +39,9 @@
 - (void)tableView:(UITableView*)tableView cell:(UITableViewCell*)cell
         willAppearAtIndexPath:(NSIndexPath*)indexPath;
 
+- (UITableViewCell*)createNewCellWithClass:(Class)klaz
+                                identifier:(NSString*)identifier;
+
 /**
  * Informs the data source that its model loaded.
  *
