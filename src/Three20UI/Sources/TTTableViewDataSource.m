@@ -54,6 +54,7 @@
 // Core
 #import "Three20Core/TTCorePreprocessorMacros.h"
 #import "Three20Core/TTGlobalCoreLocale.h"
+#import "Three20Core/TTDebug.h"
 
 #import <objc/runtime.h>
 
@@ -132,6 +133,8 @@
         }
         @catch (NSException *exception) {
             // Couldn't create cell from Nib, load normally
+            TTDWARNING(@"Could not load cell from Nib - %@", exception.reason);
+            
             cell = [[[cellClass alloc] initWithStyle:UITableViewCellStyleDefault
                                      reuseIdentifier:identifier] autorelease];
         }
