@@ -67,7 +67,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-  if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+  if ((self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])) {
     _lastInterfaceOrientation = self.interfaceOrientation;
     _tableViewStyle = UITableViewStylePlain;
   }
@@ -78,7 +78,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithStyle:(UITableViewStyle)style {
-  if (self = [self initWithNibName:nil bundle:nil]) {
+  if ((self = [self initWithNibName:nil bundle:nil])) {
     _tableViewStyle = style;
   }
 
@@ -332,9 +332,11 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)keyboardDidAppear:(BOOL)animated withBounds:(CGRect)bounds {
   [super keyboardDidAppear:animated withBounds:bounds];
-  CGRect screenRectInTableSuperView = [self.tableView.superview convertRect:[UIScreen mainScreen].bounds 
-																   fromView:[UIApplication sharedApplication].keyWindow];
-  CGFloat bottomOffset = CGRectGetMaxY(screenRectInTableSuperView) - CGRectGetMaxY(self.tableView.frame);
+  CGRect screenRectInTableSuperView = [self.tableView.superview
+                                       convertRect:[UIScreen mainScreen].bounds
+                                       fromView:[UIApplication sharedApplication].keyWindow];
+  CGFloat bottomOffset = CGRectGetMaxY(screenRectInTableSuperView) -
+            CGRectGetMaxY(self.tableView.frame);
   self.tableView.frame = TTRectContract(self.tableView.frame, 0, bounds.size.height - bottomOffset);
   [self.tableView scrollFirstResponderIntoView];
   [self layoutOverlayView];

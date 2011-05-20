@@ -104,7 +104,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initInView:(UIView *)view location:(CGPoint)location {
-  if (self = [super init]) {
+  if ((self = [super init])) {
     _tapCount = 1;
     _locationInWindow = location;
     _previousLocationInWindow = location;
@@ -474,7 +474,7 @@ TT_FIX_CATEGORY_BUG(UIViewAdditions)
 									  screenFrame.size.height + floor(self.height/2));
 	CGPoint centerEnd = CGPointMake(floor(screenFrame.size.width/2 - self.width/2),
 									screenFrame.size.height - floor(self.height/2));
-	
+
 	return [NSDictionary dictionaryWithObjectsAndKeys:
 			[NSValue valueWithCGRect:bounds], UIKeyboardBoundsUserInfoKey,
 			[NSValue valueWithCGPoint:centerBegin], UIKeyboardCenterBeginUserInfoKey,

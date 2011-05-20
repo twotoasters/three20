@@ -73,7 +73,7 @@ __attribute__((weak_import));
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)init {
-  if (self = [super init]) {
+  if ((self = [super init])) {
     _URLMap = [[TTURLMap alloc] init];
     _persistenceMode = TTNavigatorPersistenceModeNone;
 
@@ -453,7 +453,7 @@ __attribute__((weak_import));
 
   // We may need to modify the urlPath, so let's create a local copy.
   NSString* urlPath = action.urlPath;
-	
+
   NSURL* theURL = [NSURL URLWithString:urlPath];
   if ([_URLMap isAppURL:theURL]) {
     [[UIApplication sharedApplication] openURL:theURL];

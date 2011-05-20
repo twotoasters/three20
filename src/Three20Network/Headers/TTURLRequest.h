@@ -230,7 +230,10 @@
  * Add a file whose data will be posted.
  */
 - (void)addFile:(NSData*)data mimeType:(NSString*)mimeType fileName:(NSString*)fileName;
-- (void)addFile:(NSData*)data mimeType:(NSString*)mimeType fileName:(NSString*)fileName paramName:(NSString*)paramName;
+- (void)addFile:(NSData*)data
+       mimeType:(NSString*)mimeType
+       fileName:(NSString*)fileName
+      paramName:(NSString*)paramName;
 
 /**
  * Attempt to send a request.

@@ -134,7 +134,7 @@
         @catch (NSException *exception) {
             // Couldn't create cell from Nib, load normally
             TTDWARNING(@"Could not load cell from Nib - %@", exception.reason);
-            
+
             cell = [[[cellClass alloc] initWithStyle:UITableViewCellStyleDefault
                                      reuseIdentifier:identifier] autorelease];
         }

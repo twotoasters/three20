@@ -82,7 +82,7 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithURL:(NSString*)URL delegate:(id /*<TTURLRequestDelegate>*/)delegate {
-  if (self = [self init]) {
+  if ((self = [self init])) {
     _urlPath = [URL retain];
     if (nil != delegate) {
       [_delegates addObject:delegate];
@@ -94,7 +94,7 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)init {
-  if (self = [super init]) {
+  if ((self = [super init])) {
     _delegates = TTCreateNonRetainingArray();
     _cachePolicy = TTURLRequestCachePolicyDefault;
     _cacheExpirationAge = TT_DEFAULT_CACHE_EXPIRATION_AGE;
@@ -136,7 +136,7 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
       || [_httpMethod isEqualToString:@"PUT"]) {
     NSMutableString* joined = [[[NSMutableString alloc] initWithString:self.urlPath] autorelease];
     NSEnumerator* e = [_parameters keyEnumerator];
-    for (id key; key = [e nextObject]; ) {
+    for (id key; (key = [e nextObject]); ) {
       [joined appendString:key];
       [joined appendString:@"="];
       NSObject* value = [_parameters valueForKey:key];
@@ -211,7 +211,7 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
       imageKey = key;
     }
   }
-  
+
   for (NSInteger i = 0; i < _files.count; i += 4) {
     NSData* data = [_files objectAtIndex:i];
     NSString* mimeType = [_files objectAtIndex:i+1];
@@ -300,17 +300,21 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
   [_headers setObject:value forKey:field];
 }
 
-- (void)addFile:(NSData*)data mimeType:(NSString*)mimeType fileName:(NSString*)fileName paramName:(NSString*)paramName {
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)addFile:(NSData*)data
+       mimeType:(NSString*)mimeType
+       fileName:(NSString*)fileName
+      paramName:(NSString*)paramName {
 	if (!_files) {
 		_files = [[NSMutableArray alloc] init];
 	}
-	
+
 	[_files addObject:data];
 	[_files addObject:mimeType];
 	[_files addObject:fileName];
 	[_files addObject:paramName];
 }
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)addFile:(NSData*)data mimeType:(NSString*)mimeType fileName:(NSString*)fileName {
 	[self addFile:data mimeType:mimeType fileName:fileName paramName:fileName];
 }
