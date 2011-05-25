@@ -11,26 +11,30 @@
 
 @implementation TTStrikethroughTextStyle
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithNext:(TTStyle*)next {
-	if (self = [super initWithNext:next]) {
+	if ((self = [super initWithNext:next])) {
 		_underlineWidth = 1.0;
 		_percentageOfHeight = 0.50;
 	}
 	return self;
 }
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)draw:(TTStyleContext*)context {
 	[super draw:context];
-	
+
 	[_color setStroke];
-	
+
     CGContextRef ctx = UIGraphicsGetCurrentContext();
-	
+
 	CGContextSetLineWidth(ctx, _underlineWidth);
-	CGContextMoveToPoint(ctx,context.frame.origin.x, context.frame.origin.y + context.frame.size.height * _percentageOfHeight);
-	CGContextAddLineToPoint(ctx, context.frame.origin.x + context.frame.size.width, context.frame.origin.y + context.frame.size.height * _percentageOfHeight);
+	CGContextMoveToPoint(ctx,context.frame.origin.x,
+                         context.frame.origin.y + context.frame.size.height * _percentageOfHeight);
+	CGContextAddLineToPoint(ctx, context.frame.origin.x + context.frame.size.width,
+                            context.frame.origin.y +
+                            context.frame.size.height * _percentageOfHeight);
 	CGContextStrokePath(ctx);
-	
+
     return [self.next draw:context];
 }
 

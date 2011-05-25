@@ -44,7 +44,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-  if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+  if ((self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])) {
     _navigationBarStyle = UIBarStyleDefault;
     _statusBarStyle = [[UIApplication sharedApplication] statusBarStyle];
   }
@@ -55,7 +55,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)init {
-  if (self = [self initWithNibName:nil bundle:nil]) {
+  if ((self = [self initWithNibName:nil bundle:nil])) {
   }
 
   return self;
@@ -283,13 +283,11 @@
 #ifdef __IPHONE_3_21
 	CGRect frameStart;
 	[[notification.userInfo objectForKey:UIKeyboardFrameBeginUserInfoKey] getValue:&frameStart];
-	
 	CGRect keyboardBounds = CGRectMake(0, 0, frameStart.size.width, frameStart.size.height);
 #else
 	CGRect keyboardBounds;
 	[[notification.userInfo objectForKey:UIKeyboardBoundsUserInfoKey] getValue:&keyboardBounds];
 #endif
-	
 	[self keyboardDidAppear:YES withBounds:keyboardBounds];
 }
 
@@ -307,13 +305,11 @@
 #ifdef __IPHONE_3_21
 	CGRect frameEnd;
 	[[notification.userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] getValue:&frameEnd];
-	
 	CGRect keyboardBounds = CGRectMake(0, 0, frameEnd.size.width, frameEnd.size.height);
 #else
 	CGRect keyboardBounds;
 	[[notification.userInfo objectForKey:UIKeyboardBoundsUserInfoKey] getValue:&keyboardBounds];
 #endif
-	
 	[self keyboardWillDisappear:YES withBounds:keyboardBounds];
 }
 

@@ -43,7 +43,7 @@ static const CGFloat kDisclosureIndicatorWidth = 23;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString*)identifier {
-  if (self = [super initWithStyle:style reuseIdentifier:identifier]) {
+  if ((self = [super initWithStyle:style reuseIdentifier:identifier])) {
     _label = [[TTStyledTextLabel alloc] init];
     _label.contentMode = UIViewContentModeLeft;
     [self.contentView addSubview:_label];
@@ -81,7 +81,8 @@ static const CGFloat kDisclosureIndicatorWidth = 23;
 
   item.text.width = tableView.width - padding;
 
-  return item.text.height + item.padding.top + item.padding.bottom + item.margin.top + item.margin.bottom;
+  return item.text.height + item.padding.top +
+    item.padding.bottom + item.margin.top + item.margin.bottom;
 }
 
 

@@ -56,10 +56,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithRootNode:(TTStyledNode*)rootNode {
-  if (self = [super init]) {
+  if ((self = [super init])) {
     _rootNode = rootNode;
   }
-
   return self;
 }
 
@@ -399,7 +398,6 @@
   if (style && ![style isKindOfClass:[TTStyle class]]) {
 	NSLog(@"******Error********* style (%@) is not a TTStyle.", style);
     style = nil;
-    
   }
   if (style) {
     textStyle = [style firstStyleOfClass:[TTTextStyle class]];
