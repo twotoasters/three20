@@ -131,7 +131,7 @@
             // Try to create cell from Nib
             cell = [self createNewCellWithClass:cellClass identifier:identifier];
             if (nil == cell) {
-                [NSException raise:@"3.X Doesn't raise an exception on it's own. Can haz exception?" format:@""];
+                [NSException raise:@"3.X Doesn't raise an exception on it's own." format:@""];
             }
         }
         @catch (NSException *exception) {
