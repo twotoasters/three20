@@ -29,7 +29,7 @@
 #import "Three20Core/NSStringAdditions.h"
 
 static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
-
+const NSTimeInterval TTURLRequestUseDefaultTimeout = -1.0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,6 +58,8 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 
 @synthesize totalBytesDownloaded  = _totalBytesDownloaded;
 @synthesize totalContentLength    = _totalContentLength;
+
+@synthesize timeoutInterval       = _timeoutInterval;
 
 @synthesize userInfo              = _userInfo;
 @synthesize isLoading             = _isLoading;
@@ -105,6 +107,7 @@ static NSString* kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
     _shouldHandleCookies = YES;
     _charsetForMultipart = NSUTF8StringEncoding;
     _multiPartForm = YES;
+    _timeoutInterval = TTURLRequestUseDefaultTimeout;
   }
   return self;
 }
