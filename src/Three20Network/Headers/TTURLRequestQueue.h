@@ -36,7 +36,6 @@
   NSTimeInterval        _defaultTimeout;
 
   BOOL                  _suspended;
-  NSInteger             _suspendedSemaphore;
 }
 
 /**
