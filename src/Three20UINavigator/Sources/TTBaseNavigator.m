@@ -323,6 +323,8 @@ __attribute__((weak_import));
   } else {
     UINavigationController* navController = [[[[self navigationControllerClass] alloc] init]
                                              autorelease];
+    navController.modalTransitionStyle = transition;
+    navController.modalPresentationStyle = controller.modalPresentationStyle;
     [navController pushViewController: controller
                              animated: NO];
     [parentController presentModalViewController: navController
