@@ -73,14 +73,8 @@ __attribute__((weak_import));
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)init {
-<<<<<<< HEAD
-  if ((self = [super init])) {
-||||||| merged common ancestors
-  if (self = [super init]) {
-=======
 	self = [super init];
   if (self) {
->>>>>>> [Three20] Style Guide Refactoring Part 1 - Initializers.
     _URLMap = [[TTURLMap alloc] init];
     _persistenceMode = TTNavigatorPersistenceModeNone;
 

@@ -104,14 +104,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initInView:(UIView *)view location:(CGPoint)location {
-<<<<<<< HEAD
-  if ((self = [super init])) {
-||||||| merged common ancestors
-  if (self = [super init]) {
-=======
 	self = [super init];
   if (self) {
->>>>>>> [Three20] Style Guide Refactoring Part 1 - Initializers.
     _tapCount = 1;
     _locationInWindow = location;
     _previousLocationInWindow = location;
