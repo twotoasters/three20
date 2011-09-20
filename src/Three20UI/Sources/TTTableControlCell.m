@@ -162,8 +162,8 @@ static const CGFloat kControlPadding = 8;
     }
     if (nil != self.imageView.image) {
       CGSize imageSize = self.imageView.frame.size;
-      contentWidth -= imageSize.width;
-      minX += imageSize.width;
+      contentWidth -= imageSize.width + kTableCellSpacing;
+      minX += imageSize.width + kTableCellSpacing;
     }
 
     if (!_control.height) {
