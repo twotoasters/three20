@@ -115,6 +115,16 @@
   return nil;
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    UIView* header = [self tableView:tableView viewForHeaderInSection:section];
+    if (!header) {
+        return 0;
+        
+    } else {
+        return [header frame].size.height;
+    }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 /**
