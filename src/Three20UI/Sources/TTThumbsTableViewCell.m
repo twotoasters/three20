@@ -90,7 +90,7 @@ static const CGFloat kDefaultThumbSize = 75;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)thumbTouched:(TTThumbView*)thumbView {
   NSUInteger thumbViewIndex = [_thumbViews indexOfObject:thumbView];
-  NSInteger offsetIndex = _photo.index + thumbViewIndex;
+  NSInteger offsetIndex = _photo.photoIndex + thumbViewIndex;
 
   id<TTPhoto> photo = [_photo.photoSource photoAtIndex:offsetIndex];
   [_delegate thumbsTableViewCell:self didSelectPhoto:photo];
@@ -177,7 +177,7 @@ static const CGFloat kDefaultThumbSize = 75;
       [self.contentView addSubview:thumbView];
       [_thumbViews addObject:thumbView];
       if (_photo) {
-        [self assignPhotoAtIndex:_photo.index+i toView:thumbView];
+        [self assignPhotoAtIndex:_photo.photoIndex+i toView:thumbView];
       }
     }
   }
@@ -199,7 +199,7 @@ static const CGFloat kDefaultThumbSize = 75;
 
     NSInteger i = 0;
     for (TTThumbView* thumbView in _thumbViews) {
-      [self assignPhotoAtIndex:_photo.index+i toView:thumbView];
+      [self assignPhotoAtIndex:_photo.photoIndex+i toView:thumbView];
       ++i;
     }
   }

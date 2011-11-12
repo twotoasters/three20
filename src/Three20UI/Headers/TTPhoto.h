@@ -37,7 +37,7 @@
 /**
  * The index of the photo within its photo source.
  */
-@property (nonatomic) NSInteger index;
+@property (nonatomic) NSInteger photoIndex;
 
 /**
  * The caption of the photo.

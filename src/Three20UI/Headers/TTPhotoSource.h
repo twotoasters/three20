@@ -35,7 +35,7 @@
 /**
  * The total number of photos in the source, independent of the number that have been loaded.
  */
-@property (nonatomic, readonly) NSInteger photoCount;
+@property (nonatomic, readonly) NSInteger totalPhotoCount;
 
 /**
  * The maximum index of photos that have already been loaded.
