@@ -112,7 +112,8 @@ TT_FIX_CATEGORY_BUG(UITableViewAdditions)
   UITableViewCell* cell = (UITableViewCell*)[responder
                                              ancestorOrSelfWithClass:[UITableViewCell class]];
   if (cell) {
-    NSIndexPath* indexPath = [self indexPathForCell:cell];
+    CGPoint point = [cell convertPoint:responder.center toView:self];
+    NSIndexPath* indexPath = [self indexPathForRowAtPoint:point];
     if (indexPath) {
       [self scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle
             animated:YES];
