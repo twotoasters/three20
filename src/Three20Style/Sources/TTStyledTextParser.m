@@ -209,6 +209,7 @@
   } else if ([tag isEqualToString:@"a"]) {
     TTStyledLinkNode* node = [[[TTStyledLinkNode alloc] init] autorelease];
     node.URL =  [attributeDict objectForKey:@"href"];
+    node.className =  [attributeDict objectForKey:@"class"];
     [self pushNode:node];
 
   } else if ([tag isEqualToString:@"button"]) {
@@ -271,8 +272,8 @@
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)parseText:(NSString*)string URLs:(BOOL)URLs {
-  if (URLs) {
+- (void)parseText:(NSString*)string URLs:(BOOL)shouldParseURLs {
+  if (shouldParseURLs) {
     [self parseURLs:string];
   }
   else {
