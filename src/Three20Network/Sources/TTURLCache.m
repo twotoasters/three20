@@ -26,7 +26,7 @@
 #import "Three20Core/TTDebugFlags.h"
 #import "Three20Core/NSStringAdditions.h"
 
-static const  CGFloat   kLargeImageSize = 600 * 400;
+static const  CGFloat   kLargeImageSize = 600.0f * 400.0f;
 
 static        NSString* kDefaultCacheName       = @"Three20";
 static        NSString* kEtagCacheDirectoryName = @"etag";
@@ -264,8 +264,7 @@ static NSMutableDictionary* gNamedCaches = nil;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (UIImage*)loadImageFromDocuments:(NSString*)URL {
   NSString* path = TTPathForDocumentsResource([URL substringFromIndex:12]);
-  NSData* data = [NSData dataWithContentsOfFile:path];
-  return [UIImage imageWithData:data];
+  return [UIImage imageWithContentsOfFile:path];
 }
 
 
