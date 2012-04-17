@@ -378,7 +378,7 @@
   [_model.delegates removeObject:self];
   TT_RELEASE_SAFELY(_model);
   if (wasModelCreated) {
-    self.model;
+    [self model];
   }
 }
 
@@ -481,9 +481,9 @@
     _flags.isUpdatingView = YES;
 
     // Ensure the model is created
-    self.model;
+    [self model];
     // Ensure the view is created
-    self.view;
+    [self view];
 
     [self updateViewStates];
 
