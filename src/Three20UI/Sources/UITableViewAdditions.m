@@ -53,9 +53,14 @@ TT_FIX_CATEGORY_BUG(UITableViewAdditions)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (CGFloat)tableCellMargin {
   if (self.style == UITableViewStyleGrouped) {
-    return 10;
-
-  } else {
+      if (([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)) {
+          return 45.0;
+      }
+      else {
+          return 10.0;
+      }
+  }
+  else {
     return 0;
   }
 }
@@ -112,7 +117,8 @@ TT_FIX_CATEGORY_BUG(UITableViewAdditions)
   UITableViewCell* cell = (UITableViewCell*)[responder
                                              ancestorOrSelfWithClass:[UITableViewCell class]];
   if (cell) {
-    NSIndexPath* indexPath = [self indexPathForCell:cell];
+    CGPoint point = [cell convertPoint:responder.center toView:self];
+    NSIndexPath* indexPath = [self indexPathForRowAtPoint:point];
     if (indexPath) {
       [self scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle
             animated:YES];

@@ -204,17 +204,17 @@ static const NSInteger kActivityLabelTag          = 96;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)updateChrome {
-  if (_photoSource.numberOfPhotos < 2) {
+  if (_photoSource.totalPhotoCount < 2) {
     self.title = _photoSource.title;
 
   } else {
     self.title = [NSString stringWithFormat:
                   TTLocalizedString(@"%d of %d", @"Current page in photo browser (1 of 10)"),
-                  _centerPhotoIndex+1, _photoSource.numberOfPhotos];
+                  _centerPhotoIndex+1, _photoSource.totalPhotoCount];
   }
 
   if (![self.ttPreviousViewController isKindOfClass:[TTThumbsViewController class]]) {
-    if (_photoSource.numberOfPhotos > 1) {
+    if (_photoSource.totalPhotoCount > 1) {
       self.navigationItem.rightBarButtonItem =
       [[[UIBarButtonItem alloc] initWithTitle:TTLocalizedString(@"See All",
                                                                 @"See all photo thumbnails")
@@ -232,9 +232,9 @@ static const NSInteger kActivityLabelTag          = 96;
   }
 
   UIBarButtonItem* playButton = [_toolbar itemWithTag:1];
-  playButton.enabled = _photoSource.numberOfPhotos > 1;
+  playButton.enabled = _photoSource.totalPhotoCount > 1;
   _previousButton.enabled = _centerPhotoIndex > 0;
-  _nextButton.enabled = _centerPhotoIndex >= 0 && _centerPhotoIndex < _photoSource.numberOfPhotos-1;
+  _nextButton.enabled = _centerPhotoIndex >= 0 && _centerPhotoIndex < _photoSource.totalPhotoCount-1;
 }
 
 
@@ -407,7 +407,7 @@ static const NSInteger kActivityLabelTag          = 96;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)slideshowTimer {
-  if (_centerPhotoIndex == _photoSource.numberOfPhotos-1) {
+  if (_centerPhotoIndex == _photoSource.totalPhotoCount-1) {
     _scrollView.centerPageIndex = 0;
 
   } else {
@@ -458,7 +458,7 @@ static const NSInteger kActivityLabelTag          = 96;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)nextAction {
   [self pauseAction];
-  if (_centerPhotoIndex < _photoSource.numberOfPhotos-1) {
+  if (_centerPhotoIndex < _photoSource.totalPhotoCount-1) {
     _scrollView.centerPageIndex = _centerPhotoIndex+1;
   }
 }
@@ -664,7 +664,7 @@ static const NSInteger kActivityLabelTag          = 96;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)canShowModel {
-  return _photoSource.numberOfPhotos > 0;
+  return _photoSource.totalPhotoCount > 0;
 }
 
 
@@ -715,9 +715,9 @@ static const NSInteger kActivityLabelTag          = 96;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)moveToNextValidPhoto {
-  if (_centerPhotoIndex >= _photoSource.numberOfPhotos) {
+  if (_centerPhotoIndex >= _photoSource.totalPhotoCount) {
     // We were positioned at an index that is past the end, so move to the last photo
-    [self moveToPhotoAtIndex:_photoSource.numberOfPhotos - 1 withDelay:NO];
+    [self moveToPhotoAtIndex:_photoSource.totalPhotoCount - 1 withDelay:NO];
 
   } else {
     [self moveToPhotoAtIndex:_centerPhotoIndex withDelay:NO];
@@ -734,7 +734,7 @@ static const NSInteger kActivityLabelTag          = 96;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (void)modelDidFinishLoad:(id<TTModel>)model {
   if (model == _model) {
-    if (_centerPhotoIndex >= _photoSource.numberOfPhotos) {
+    if (_centerPhotoIndex >= _photoSource.totalPhotoCount) {
       [self moveToNextValidPhoto];
       [_scrollView reloadData];
       [self resetVisiblePhotoViews];
@@ -865,7 +865,7 @@ static const NSInteger kActivityLabelTag          = 96;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (NSInteger)numberOfPagesInScrollView:(TTScrollView*)scrollView {
-  return _photoSource.numberOfPhotos;
+  return _photoSource.totalPhotoCount;
 }
 
 
@@ -945,11 +945,11 @@ static const NSInteger kActivityLabelTag          = 96;
       [_photoSource release];
       _photoSource = [photo.photoSource retain];
 
-      [self moveToPhotoAtIndex:photo.index withDelay:NO];
+      [self moveToPhotoAtIndex:photo.photoIndex withDelay:NO];
       self.model = _photoSource;
 
     } else {
-      [self moveToPhotoAtIndex:photo.index withDelay:NO];
+      [self moveToPhotoAtIndex:photo.photoIndex withDelay:NO];
       [self refresh];
     }
   }

@@ -34,7 +34,7 @@
       id<TTPhoto> photo = [_photos objectAtIndex:i];
       if ((NSNull*)photo != [NSNull null]) {
         photo.photoSource = self;
-        photo.index = i;
+        photo.photoIndex = i;
       }
     }
 
@@ -58,7 +58,7 @@
       id<TTPhoto> photo = [_photos objectAtIndex:i];
       if ((NSNull*)photo != [NSNull null]) {
         photo.photoSource = self;
-        photo.index = i;
+        photo.photoIndex = i;
       }
     }
 

@@ -28,8 +28,8 @@
 // Core
 #import "Three20Core/TTCorePreprocessorMacros.h"
 
-static const CGFloat kDefaultTextViewLines = 5;
-static const CGFloat kControlPadding = 8;
+static const CGFloat kDefaultTextViewLines = 5.0f;
+static const CGFloat kControlPadding = 8.0f;
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,6 +159,11 @@ static const CGFloat kControlPadding = 8;
       CGSize textSize = [self.textLabel sizeThatFits:self.contentView.bounds.size];
       contentWidth -= textSize.width + kTableCellSpacing;
       minX += textSize.width + kTableCellSpacing;
+    }
+    if (nil != self.imageView.image) {
+      CGSize imageSize = self.imageView.frame.size;
+      contentWidth -= imageSize.width + kTableCellSpacing;
+      minX += imageSize.width + kTableCellSpacing;
     }
 
     if (!_control.height) {

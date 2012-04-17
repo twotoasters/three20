@@ -32,11 +32,11 @@
 // Core
 #import "Three20Core/TTCorePreprocessorMacros.h"
 
-static CGFloat kMargin          = 10;
-static CGFloat kPadding         = 15;
-static CGFloat kBannerPadding   = 8;
-static CGFloat kSpacing         = 6;
-static CGFloat kProgressMargin  = 6;
+static CGFloat kMargin          = 10.0f;
+static CGFloat kPadding         = 15.0f;
+static CGFloat kBannerPadding   = 8.0f;
+static CGFloat kSpacing         = 6.0f;
+static CGFloat kProgressMargin  = 6.0f;
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,7 +113,7 @@ static CGFloat kProgressMargin  = 6;
 
     } else if (_style == TTActivityLabelStyleBlackBezel || _style == TTActivityLabelStyleBlackBox) {
       _activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:
-                                                            UIActivityIndicatorViewStyleWhiteLarge];
+                                                            UIActivityIndicatorViewStyleWhite];
       _activityIndicator.frame = CGRectMake(0, 0, 24, 24);
       _label.font = TTSTYLEVAR(activityLabelFont);
       _label.textColor = [UIColor whiteColor];
@@ -191,7 +191,7 @@ static CGFloat kProgressMargin  = 6;
 
   CGSize textSize = [_label.text sizeWithFont:_label.font];
 
-  CGFloat indicatorSize = 0;
+  CGFloat indicatorSize = 0.0f;
   [_activityIndicator sizeToFit];
   if (_activityIndicator.isAnimating) {
     if (_activityIndicator.height > textSize.height) {
