@@ -234,7 +234,8 @@ static const NSInteger kActivityLabelTag          = 96;
   UIBarButtonItem* playButton = [_toolbar itemWithTag:1];
   playButton.enabled = _photoSource.totalPhotoCount > 1;
   _previousButton.enabled = _centerPhotoIndex > 0;
-  _nextButton.enabled = _centerPhotoIndex >= 0 && _centerPhotoIndex < _photoSource.totalPhotoCount-1;
+  _nextButton.enabled = _centerPhotoIndex >= 0 &&
+    _centerPhotoIndex < _photoSource.totalPhotoCount-1;
 }
 
 

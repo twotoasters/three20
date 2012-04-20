@@ -10,7 +10,7 @@
 		664B29BF12848AA50008D569 /* TTErrorCodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 664B29BC12848AA50008D569 /* TTErrorCodes.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		664B29C212848AAD0008D569 /* TTErrorCodes.m in Sources */ = {isa = PBXBuildFile; fileRef = 664B29C012848AAD0008D569 /* TTErrorCodes.m */; };
 		664B29C312848AAD0008D569 /* TTErrorCodes.m in Sources */ = {isa = PBXBuildFile; fileRef = 664B29C012848AAD0008D569 /* TTErrorCodes.m */; };
-		66C16B1C1263059A00A7825A /* libThree20Network-Xcode3.2.5.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 662D81EF12630516005851C2 /* libThree20Network-Xcode3.2.5.a */; };
+		66C16B1C1263059A00A7825A /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		66F955B0126662E300BEF6F0 /* NetworkURLCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 66F955AF126662E300BEF6F0 /* NetworkURLCacheTests.m */; };
 		66F955B1126662E300BEF6F0 /* NetworkURLCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 66F955AF126662E300BEF6F0 /* NetworkURLCacheTests.m */; };
 		66F955BA1266647A00BEF6F0 /* both.png in Resources */ = {isa = PBXBuildFile; fileRef = 66F955B71266647A00BEF6F0 /* both.png */; };
@@ -150,7 +150,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				66C16B1C1263059A00A7825A /* libThree20Network-Xcode3.2.5.a in Frameworks */,
+				66C16B1C1263059A00A7825A /* (null) in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -184,9 +184,7 @@
 			isa = PBXGroup;
 			children = (
 				BEF31F3A0F352DF5000DE5D2 /* libThree20Network.a */,
-				662D81EF12630516005851C2 /* libThree20Network-Xcode3.2.5.a */,
 				EB9E6C6210B6A8F800DE563C /* NetworkUnitTests.octest */,
-				662D81B2126304EB005851C2 /* NetworkUnitTests-Xcode3.2.5.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -385,24 +383,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				662D81CD12630516005851C2 /* Three20Network.h in Headers */,
-				662D81CE12630516005851C2 /* TTGlobalNetwork.h in Headers */,
-				662D81CF12630516005851C2 /* TTUserInfo.h in Headers */,
-				662D81D012630516005851C2 /* TTModel.h in Headers */,
-				662D81D112630516005851C2 /* TTModelDelegate.h in Headers */,
-				662D81D212630516005851C2 /* TTRequestLoader.h in Headers */,
-				662D81D312630516005851C2 /* TTURLCache.h in Headers */,
-				662D81D412630516005851C2 /* TTURLDataResponse.h in Headers */,
-				662D81D512630516005851C2 /* TTURLImageResponse.h in Headers */,
-				662D81D612630516005851C2 /* TTURLRequest.h in Headers */,
-				662D81D712630516005851C2 /* TTURLRequestCachePolicy.h in Headers */,
-				662D81D812630516005851C2 /* TTURLRequestDelegate.h in Headers */,
-				662D81D912630516005851C2 /* TTURLRequestModel.h in Headers */,
-				662D81DA12630516005851C2 /* TTURLRequestQueue.h in Headers */,
-				662D81DB12630516005851C2 /* TTURLResponse.h in Headers */,
-				662D81DC12630516005851C2 /* Three20Network_Prefix.pch in Headers */,
-				662D81DD12630516005851C2 /* TTURLRequestQueueInternal.h in Headers */,
-				664B29BE12848AA50008D569 /* TTErrorCodes.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,7 +421,6 @@
 				662D81A5126304EB005851C2 /* Resources */,
 				662D81A6126304EB005851C2 /* Sources */,
 				662D81AA126304EB005851C2 /* Frameworks */,
-				662D81AD126304EB005851C2 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -450,7 +429,6 @@
 			);
 			name = "Three20NetworkUnitTests-Xcode3.2.5";
 			productName = CoreUnitTests;
-			productReference = 662D81B2126304EB005851C2 /* NetworkUnitTests-Xcode3.2.5.octest */;
 			productType = "com.apple.product-type.bundle";
 		};
 		662D81C912630516005851C2 /* Three20Network-Xcode3.2.5 */ = {
@@ -458,7 +436,6 @@
 			buildConfigurationList = 662D81EB12630516005851C2 /* Build configuration list for PBXNativeTarget "Three20Network-Xcode3.2.5" */;
 			buildPhases = (
 				662D81CC12630516005851C2 /* Headers */,
-				662D81DE12630516005851C2 /* Protect Copied Headers */,
 				662D81DF12630516005851C2 /* Sources */,
 				662D81EA12630516005851C2 /* Frameworks */,
 			);
@@ -468,7 +445,6 @@
 			);
 			name = "Three20Network-Xcode3.2.5";
 			productName = Three20;
-			productReference = 662D81EF12630516005851C2 /* libThree20Network-Xcode3.2.5.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		BEF31F390F352DF5000DE5D2 /* Three20Network */ = {
@@ -517,7 +493,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Three20Network" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -622,10 +598,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				662D81A7126304EB005851C2 /* MockModelDelegate.m in Sources */,
-				662D81A8126304EB005851C2 /* NetworkModelTests.m in Sources */,
 				66F955B1126662E300BEF6F0 /* NetworkURLCacheTests.m in Sources */,
-				E1F076A2130521F7007CA6F1 /* NetworkRequestTimeoutTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -633,16 +606,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				662D81E012630516005851C2 /* TTGlobalNetwork.m in Sources */,
-				662D81E112630516005851C2 /* TTUserInfo.m in Sources */,
-				662D81E212630516005851C2 /* TTModel.m in Sources */,
-				662D81E312630516005851C2 /* TTRequestLoader.m in Sources */,
-				662D81E412630516005851C2 /* TTURLCache.m in Sources */,
-				662D81E512630516005851C2 /* TTURLDataResponse.m in Sources */,
-				662D81E612630516005851C2 /* TTURLImageResponse.m in Sources */,
-				662D81E712630516005851C2 /* TTURLRequest.m in Sources */,
-				662D81E812630516005851C2 /* TTURLRequestModel.m in Sources */,
-				662D81E912630516005851C2 /* TTURLRequestQueue.m in Sources */,
 				664B29C212848AAD0008D569 /* TTErrorCodes.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -708,11 +671,9 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
-				PREBINDING = NO;
 				PRODUCT_NAME = "$(BASE_PRODUCT_NAME)-Xcode3.2.5";
 				SDKROOT = iphoneos;
 			};
@@ -724,11 +685,9 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
-				PREBINDING = NO;
 				PRODUCT_NAME = "$(BASE_PRODUCT_NAME)-Xcode3.2.5";
 				SDKROOT = iphoneos;
 			};
@@ -740,9 +699,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				PREBINDING = NO;
 				PRODUCT_NAME = "$(BASE_PRODUCT_NAME)-Xcode3.2.5";
 				SDKROOT = iphoneos;
 				ZERO_LINK = NO;
@@ -757,7 +714,6 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
-				PREBINDING = NO;
 				PRODUCT_NAME = "$(BASE_PRODUCT_NAME)-Xcode3.2.5";
 				SDKROOT = iphoneos;
 			};
@@ -772,7 +728,6 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
-				PREBINDING = NO;
 				PRODUCT_NAME = "$(BASE_PRODUCT_NAME)-Xcode3.2.5";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
@@ -785,8 +740,6 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				PREBINDING = NO;
 				PRODUCT_NAME = "$(BASE_PRODUCT_NAME)-Xcode3.2.5";
 				SDKROOT = iphoneos;
 				ZERO_LINK = NO;
@@ -818,6 +771,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_THUMB_SUPPORT = NO;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
 			};
@@ -849,6 +803,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_THUMB_SUPPORT = NO;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -863,6 +818,7 @@
 				);
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_THUMB_SUPPORT = NO;
 				SDKROOT = iphoneos;
 				ZERO_LINK = NO;
 			};
