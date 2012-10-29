@@ -127,6 +127,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    NSLog(@"sections=%@ items=%@",[_sections description],[_items description]);
   if (_sections) {
     NSArray* items = [_items objectAtIndex:section];
     return items.count;

@@ -99,37 +99,38 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-@implementation UITouch (TTCategory)
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-- (id)initInView:(UIView *)view location:(CGPoint)location {
-	self = [super init];
-  if (self) {
-    _tapCount = 1;
-    _locationInWindow = location;
-    _previousLocationInWindow = location;
-
-    UIView *target = [view.window hitTest:_locationInWindow withEvent:nil];
-    _view = [target retain];
-    _window = [view.window retain];
-    _phase = UITouchPhaseBegan;
-    _touchFlags._firstTouchForView = 1;
-    _touchFlags._isTap = 1;
-    _timestamp = [NSDate timeIntervalSinceReferenceDate];
-  }
-  return self;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)changeToPhase:(UITouchPhase)phase {
-  _phase = phase;
-  _timestamp = [NSDate timeIntervalSinceReferenceDate];
-}
-
-
-@end
+//@implementation UITouch (TTCategory)
+//
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//- (id)initInView:(UIView *)view location:(CGPoint)location {
+//	self = [super init];
+//  if (self) {
+//    _tapCount = 1;
+//    _locationInWindow = location;
+//    _previousLocationInWindow = location;
+//
+//    UIView *target = [view.window hitTest:_locationInWindow withEvent:nil];
+//    _view = [target retain];
+//    _window = [view.window retain];
+//    _phase = UITouchPhaseBegan;
+//    _touchFlags._firstTouchForView = 1;
+//    _touchFlags._isTap = 1;
+//    _timestamp = [NSDate timeIntervalSinceReferenceDate];
+//  }
+//  return self;
+//}
+//
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//- (void)changeToPhase:(UITouchPhase)phase {
+//  _phase = phase;
+//  _timestamp = [NSDate timeIntervalSinceReferenceDate];
+//}
+//
+//
+//@end
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
